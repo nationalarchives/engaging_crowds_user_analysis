@@ -15,11 +15,10 @@ import os
 #Nested JSON data to keep (sits insides cells, will be expanded out to columns)
 METADATA_KEEPERS = ['started_at', 'finished_at']
 ALL_SUBJECT_KEEPERS = ['#priority', 'retired.retired_at']
-_S_B_SUBJECT_KEEPERS = ['Date', 'Page', 'Catalogue']
 _HMS_NHS_SUBJECT_KEEPERS = ['Filename']
 WORKFLOW_SUBJECT_KEEPERS = {
-  'meetings':                                                        _S_B_SUBJECT_KEEPERS,
-  'index':                                                           _S_B_SUBJECT_KEEPERS,
+  'meetings':                                               ['Date', 'Page', 'Catalogue'],
+  'people':                                                    ['Surnames starting with'],
   '1-admission-number':                                          _HMS_NHS_SUBJECT_KEEPERS,
   '2-date-of-entry':                                             _HMS_NHS_SUBJECT_KEEPERS,
   '3-name':                                                      _HMS_NHS_SUBJECT_KEEPERS,
@@ -38,6 +37,7 @@ WORKFLOW_SUBJECT_KEEPERS = {
 #Workflow version to keep (will remove rows where the workflow with name 'key' has version less than 'value')
 WORKFLOW_KEEPERS = {
   'meetings': 132.205,
+  'people': 56.83,
   '1-admission-number': 3.1,
   '2-date-of-entry': 3.1,
   '3-name': 3.1,
