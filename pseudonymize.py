@@ -82,15 +82,6 @@ if os.path.exists(args.dictionary):
 else:
   identities = {}
 
-#Hack -- use in combination with | sort | uniq -c to get a quick field name dump
-def dump_json(cell):
-  def dump_dict(d, depth = 0):
-    for key, value in d.items():
-      print(f'{"*"*depth}{key}')
-      if isinstance(value, dict):
-        dump_dict(value, depth + 1)
-  dump_dict(json.loads(cell))
-
 def pseudonymize(row):
   uid = row['user_id']
   if np.isnan(uid):
@@ -162,10 +153,6 @@ def main():
   #Read in all of the CSVs with a generator expression, as suggested here:
   #https://stackoverflow.com/a/21232849
   df = pd.concat([read_workflow(x) for x in args.workflows], ignore_index = True)
-
-  #HACK -- comment in to dump what is in the metadata, use with sort | uniq -c
-  #df['metadata'].apply(dump_json)
-  #df['subject_data'].apply(dump_json)
 
   #Pseudonymize and then drop private field(s)
   df['pseudonym'] = df[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns')
