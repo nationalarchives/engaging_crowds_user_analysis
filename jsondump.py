@@ -32,6 +32,12 @@ def dump_keys(d, depth = 0):
     if isinstance(value, dict):
       dump_keys(value, depth + 1)
 
+def update_keys(c, u):
+  for key, value in c.items():
+    if not key in u: u[key] = {}
+    if isinstance(value, dict):
+      update_keys(c[key], u[key])
+
 def main():
   #Read in all of the CSVs with a generator expression, as suggested here:
   #https://stackoverflow.com/a/21232849
@@ -41,7 +47,7 @@ def main():
 
   for column in ('metadata', 'subject_data'):
     union = {}
-    df[column].apply(lambda x: union.update(json.loads(x)))
+    df[column].apply(lambda x: update_keys(json.loads(x), union))
     print(column.upper())
     dump_keys(union)
     print()
