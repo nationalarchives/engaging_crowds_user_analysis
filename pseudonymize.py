@@ -56,6 +56,26 @@ WORKFLOW_KEEPERS = {
   '13-number-of-days-victualled': 3.1,
 }
 
+#Based on displayed timestamp in the emails as I received them
+HMS_NHS_LAUNCH_EMAIL_STAMP = '2021-06-29T16:19Z'
+SB_LAUNCH_EMAIL_STAMP = '2021-11-16T17:30Z'
+WORKFLOW_STARTSTAMP = {
+  'meetings': SB_LAUNCH_EMAIL_STAMP,
+  'people': SB_LAUNCH_EMAIL_STAMP,
+  '1-admission-number': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  '2-date-of-entry': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  '3-name': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  '4-quality': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  '5-age': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  '6-place-of-birth': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  '7-port-sailed-out-of': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  '8-years-at-sea': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  '9-last-services': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  '10-under-what-circumstances-admitted-or-nature-of-complaint': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  '11-date-of-discharge': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  '12-how-disposed-of': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  '13-number-of-days-victualled': HMS_NHS_LAUNCH_EMAIL_STAMP,
+}
 
 parser = argparse.ArgumentParser()
 parser.add_argument('workflows',
@@ -149,6 +169,9 @@ def read_workflow(workflow):
   df = df[df['workflow_version'] >= WORKFLOW_KEEPERS[workflow]]
   df = df.reset_index(drop = True) #Reset the index so that we line up with the JSON expansion
 
+  df['START'] = WORKFLOW_STARTSTAMP[workflow]
+  df['START'] = df['START'].astype(np.datetime64)
+
   #Pull interesting bits of subject info out into their own fields
   def parse_subj_info(cell):
     subj_info = json.loads(cell)
@@ -185,7 +208,11 @@ def main():
   #Expand out the interesting bits of the metadata, drop the rest
   df = expand_json(df, 'metadata', METADATA_KEEPERS, 'md')
 
-  df.to_csv('all_classifications.csv', index = False)
+  df['md.started_at'] = df['md.started_at'].astype(np.datetime64)
+  df = df[df['md.started_at'] >= df['START']]
+  df = df.drop('START', axis = 'columns')
+
+  df.to_csv('all_classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
 
   with open(args.dictionary, 'w') as f:
     f.write(json.dumps(identities))
