@@ -12,6 +12,9 @@ import os
 #pd.set_option('display.max_rows', None)
 #pd.set_option('display.expand_frame_repr', None)
 
+#Dictionary storing individual CSV files minimally altered
+minimal_pseudonyms = {}
+
 #Nested JSON data to keep (sits insides cells, will be expanded out to columns)
 METADATA_KEEPERS = ['started_at', 'finished_at']
 ALL_SUBJECT_KEEPERS = ['#priority', 'retired.retired_at']
@@ -129,6 +132,8 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
 def read_workflow(workflow):
   df = pd.read_csv(f'{args.exports}/{workflow}-classifications.csv')
 
+  minimal_pseudonyms[workflow] = df #Store the original classification
+
   df = df[df['workflow_version'] >= WORKFLOW_KEEPERS[workflow]]
   df = df.reset_index(drop = True) #Reset the index so that we line up with the JSON expansion
 
@@ -154,7 +159,13 @@ def main():
   #https://stackoverflow.com/a/21232849
   df = pd.concat([read_workflow(x) for x in args.workflows], ignore_index = True)
 
-  #Pseudonymize and then drop private field(s)
+  #Pseudonymise the individual files, building pseudonyms for everyone who has ever classified as a side effect
+  for k, v in minimal_pseudonyms.items():
+    v['user_name'] = v[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns')
+    v['user_id'] = v['user_name'].apply(lambda x: x[5:] if x.startswith('name:') else '')
+    v['user_ip'] = v['user_name'].apply(lambda x: x[5:] if x.startswith('anon:') else '')
+
+  #Pseudonymize using the previously-generated pseuondyms, and then drop private field(s)
   df['pseudonym'] = df[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns')
   df = df.drop(['user_name', 'user_id', 'user_ip'], axis = 'columns')
 
@@ -168,5 +179,8 @@ def main():
 
   with open(args.dictionary, 'w') as f:
     f.write(json.dumps(identities))
+
+  for k, v in minimal_pseudonyms.items():
+    v.to_csv(f'secrets/{k}-classifications.csv', index = False)
 
 main()
