@@ -218,6 +218,9 @@ def main():
     f.write(json.dumps(identities))
 
   for k, v in minimal_pseudonyms.items():
+    v['KEEP'] = v['metadata'].apply(lambda x: json.loads(x)['started_at'] >= WORKFLOW_STARTSTAMP[k])
+    v = v[v['KEEP']]
+    v = v.drop('KEEP', axis = 'columns')
     v.to_csv(f'secrets/{k}-classifications.csv', index = False)
 
 main()
