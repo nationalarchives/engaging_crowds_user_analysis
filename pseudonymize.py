@@ -91,16 +91,28 @@ def pseudonymize(row):
     #Anonymous user -- use the ip addr as the uid, so that all
     #classifications from the apparent-same IP addr get the same pseudonym
     uid = row['user_ip']
-    prefix = 'anon'
+    prefix = 'anon:'
   else:
     #Written out as a stringified int, so force what we read from the
     #dataframe to the same format. Otherwise the keys will not match.
     uid = str(int(uid))
-    prefix = 'name'
-  if not uid in identities:
+    prefix = 'name:'
+
+  if uid in identities:
+    user_name = identities[uid]
+    prefix = user_name[:5]
+    pseudonym = user_name[5:]
+  else:
     pseudonym = len(identities) + 1
-    identities[uid] = f'{prefix}:{pseudonym}'
-  return identities[uid]
+    identities[uid] = f'{prefix}{pseudonym}'
+    user_name = identities[uid]
+
+  if prefix == 'name:':
+    return [user_name, pseudonym, '']
+  elif prefix == 'anon:':
+    return [user_name, '', pseudonym]
+  else:
+    raise Exception(f'{prefix} {user_name} {pseudonym}')
 
 def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
   def check_metadata(row):
@@ -161,12 +173,10 @@ def main():
 
   #Pseudonymise the individual files, building pseudonyms for everyone who has ever classified as a side effect
   for k, v in minimal_pseudonyms.items():
-    v['user_name'] = v[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns')
-    v['user_id'] = v['user_name'].apply(lambda x: x[5:] if x.startswith('name:') else '')
-    v['user_ip'] = v['user_name'].apply(lambda x: x[5:] if x.startswith('anon:') else '')
+    v[['user_name', 'user_id', 'user_ip']] = v[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns', result_type = 'expand')
 
-  #Pseudonymize using the previously-generated pseuondyms, and then drop private field(s)
-  df['pseudonym'] = df[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns')
+  #Pseudonymize using the previously-generated pseuondyms, and then drop the useless field
+  df['pseudonym'] = df[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns', result_type = 'expand')[0]
   df = df.drop(['user_name', 'user_id', 'user_ip'], axis = 'columns')
 
   #Drop fields that we do not need at all
