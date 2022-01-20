@@ -16,7 +16,7 @@ import os
 minimal_pseudonyms = {}
 
 #Nested JSON data to keep (sits insides cells, will be expanded out to columns)
-METADATA_KEEPERS = ['started_at', 'finished_at']
+METADATA_KEEPERS = ['started_at', 'finished_at', 'utc_offset']
 ALL_SUBJECT_KEEPERS = ['#priority', 'retired.retired_at']
 _HMS_NHS_SUBJECT_KEEPERS = ['Filename']
 WORKFLOW_SUBJECT_KEEPERS = {
