@@ -236,12 +236,10 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
   jn = pd.json_normalize(df[json_column])#, meta = json_fields)[json_fields]
 
   #Handle the JSON having been treated as case-insensitive
-  normalized_json_fields = []
   for json_field in json_fields:
     lower_field = json_field.lower()
     insensitive_count = Counter([x.lower() for x in jn.columns])[lower_field]
     if insensitive_count == 1:
-      normalized_json_fields.append(json_field)
       continue
     if insensitive_count != 2:
       raise Exception(f'{lower_field}: {insensitive_count}') #Only wrote code to handle lowercase + one other version
@@ -252,9 +250,10 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
     print(f'Fixing up apparent use of both {json_field} and {lower_field}', file = sys.stderr)
 
     jn[lower_field] = jn[lower_field].combine_first(jn[json_field])
+    jn = jn.drop(json_field, axis = 1)
     assert not jn[lower_field].isnull().any(), jn[jn[lower_field].isnull()][lower_field]
-    normalized_json_fields.append(lower_field)
-  json_fields = normalized_json_fields
+  jn = jn.rename({x: x.lower() for x in json_fields}, axis = 1)
+  json_fields =     [x.lower() for x in json_fields]
 
   df = df.join(jn[json_fields])
   df.apply(check_metadata, axis = 'columns') #Check that the metadata looks right -- has caught real problems at least once
