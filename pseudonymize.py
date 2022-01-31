@@ -263,6 +263,7 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
 
 #Read workflow's CSV file into a dataframe and do workflow-specific transformations
 def read_workflow(workflow):
+  print(workflow, WORKFLOW_NAMES[workflow])
   csv_file = f'{args.exports}/{WORKFLOW_NAMES[workflow]}-classifications.csv'
   df = pd.read_csv(csv_file)
   if not df.workflow_id.unique().size == 1:
