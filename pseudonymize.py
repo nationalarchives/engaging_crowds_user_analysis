@@ -21,6 +21,7 @@ minimal_pseudonyms = {}
 METADATA_KEEPERS = ['started_at', 'finished_at', 'utc_offset']
 ALL_SUBJECT_KEEPERS = ['#priority', 'retired.retired_at']
 _HMS_NHS_SUBJECT_KEEPERS = ['Filename']
+_RBGE_SUBJECT_KEEPERS = ['Botanist','Group','Format','Species','Barcode']
 WORKFLOW_SUBJECT_KEEPERS = {
   'meetings':                                               ['Date', 'Page', 'Catalogue'],
   'people':                                                    ['Surnames starting with'],
@@ -37,6 +38,8 @@ WORKFLOW_SUBJECT_KEEPERS = {
   '11-date-of-discharge':                                        _HMS_NHS_SUBJECT_KEEPERS,
   '12-how-disposed-of':                                          _HMS_NHS_SUBJECT_KEEPERS,
   '13-number-of-days-victualled':                                _HMS_NHS_SUBJECT_KEEPERS,
+  'geography':                                                      _RBGE_SUBJECT_KEEPERS,
+  'latitude-longitude':                                             _RBGE_SUBJECT_KEEPERS,
 }
 
 #Workflow version to keep (will remove rows where the workflow with name 'key' has version less than 'value')
@@ -56,11 +59,14 @@ WORKFLOW_KEEPERS = {
   '11-date-of-discharge': 3.1,
   '12-how-disposed-of': 3.1,
   '13-number-of-days-victualled': 3.1,
+  'geography': 122.201,
+  'latitude-longitude': 46.223,
 }
 
 #Based on displayed timestamp in the emails as I received them
 HMS_NHS_LAUNCH_EMAIL_STAMP = '2021-06-29T16:19:00.000000Z'
 SB_LAUNCH_EMAIL_STAMP = '2021-11-16T17:30:00.000000Z'
+RBGE_LAUNCH_EMAIL_STAMP = '2022-01-11T17:11:00.000000Z'
 WORKFLOW_STARTSTAMP = {
   'meetings': SB_LAUNCH_EMAIL_STAMP,
   'people': SB_LAUNCH_EMAIL_STAMP,
@@ -77,6 +83,8 @@ WORKFLOW_STARTSTAMP = {
   '11-date-of-discharge': HMS_NHS_LAUNCH_EMAIL_STAMP,
   '12-how-disposed-of': HMS_NHS_LAUNCH_EMAIL_STAMP,
   '13-number-of-days-victualled': HMS_NHS_LAUNCH_EMAIL_STAMP,
+  'geography': RBGE_LAUNCH_EMAIL_STAMP,
+  'latitude-longitude': RBGE_LAUNCH_EMAIL_STAMP,
 }
 
 parser = argparse.ArgumentParser()
