@@ -255,6 +255,10 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
   jn = jn.rename({x: x.lower() for x in json_fields}, axis = 1)
   json_fields =     [x.lower() for x in json_fields]
 
+  for x in json_fields:
+    if x in df.columns:
+      raise Exception(f'JSON field {x!r} already exists in dataframe columns')
+
   df = df.join(jn[json_fields])
   df.apply(check_metadata, axis = 'columns') #Check that the metadata looks right -- has caught real problems at least once
   df = df.rename(columns = {x: f'{prefix}.{x}' for x in json_fields})
