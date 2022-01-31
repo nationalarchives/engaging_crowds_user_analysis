@@ -199,7 +199,8 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
       for k in keys:
         lk = k.lower()
         if k != lk:
-          assert lk not in d
+          if lk in d:
+            raise Exception('Key collision when normalising JSON in DataFrame to lowercase')
           d[lk] = d.pop(k)
         if isinstance(d[lk], dict):
           d[lk] = lc_dict(d[lk])
