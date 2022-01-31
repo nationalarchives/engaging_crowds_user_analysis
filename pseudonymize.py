@@ -302,7 +302,7 @@ def main():
   df = pd.concat([read_workflow(x) for x in args.workflows], ignore_index = True)
 
   #Pseudonymise the individual files, building pseudonyms for everyone who has ever classified as a side effect
-  for k, v in minimal_pseudonyms.items():
+  for v in minimal_pseudonyms.values():
     v[['user_name', 'user_id', 'user_ip']] = v[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns', result_type = 'expand')
 
   #Pseudonymize using the previously-generated pseuondyms, and then drop the useless field
