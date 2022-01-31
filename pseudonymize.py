@@ -6,6 +6,8 @@ import csv
 import argparse
 import json
 import os
+import sys
+from collections import Counter
 
 #For debugging
 #pd.set_option('display.max_columns', None)
@@ -136,11 +138,36 @@ def pseudonymize(row):
 
 def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
   def check_metadata(row):
-    #Check that key in original JSON matches what is in the column
+    #Check that key in original JSON matches what is in the column -- but case-insensitively
+    #Also confirms that all of the expected metadata is actually in there
     #Assume that '.' is a path separator
+
+    #Return a copy of a dict with all keys lower-cased
+    #Dictionaries are deep copied, but any other data structures contained in the dictionary are shallow-copied
+    #We only mutate the keys, so the original structure inside the DataFrame is unchanged
+    def lc_dict(d):
+      d = d.copy()
+      keys = list(d.keys())
+      for k in keys:
+        lk = k.lower()
+        if k != lk:
+          assert lk not in d
+          d[lk] = d.pop(k)
+        if isinstance(d[lk], dict):
+          d[lk] = lc_dict(d[lk])
+      return d
+
+    normalized_json = lc_dict(row[json_column])
     for path in json_fields:
-      d = row[json_column]
-      for k in path.split('.'):
+      d = normalized_json
+      for k in [x.lower() for x in path.split('.')]:
+        if not k in d:
+          if k == '#priority':
+            if 'priority' in d: #Accept (but warn about) use of priority for #priority
+              print(f'Allowing priority instead of #priority for subject {row.subject_ids}', file = sys.stderr)
+              d = None
+              break
+              #In all other cases, I'll get an exception, which'll make me aware of another metadata anomaly to handle
         d = d[k]
         if d is None:
           break
@@ -153,8 +180,30 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
       else:         assert d == row[path], errstring()
 
   df[json_column] = df[json_column].apply(json_parser)
-  jn = pd.json_normalize(df[json_column], meta = json_fields)[json_fields]
-  df = df.join(jn)
+  jn = pd.json_normalize(df[json_column])#, meta = json_fields)[json_fields]
+
+  #Handle the JSON having been treated as case-insensitive
+  normalized_json_fields = []
+  for json_field in json_fields:
+    lower_field = json_field.lower()
+    insensitive_count = Counter([x.lower() for x in jn.columns])[lower_field]
+    if insensitive_count == 1:
+      normalized_json_fields.append(json_field)
+      continue
+    if insensitive_count != 2:
+      raise Exception(f'{lower_field}: {insensitive_count}') #Only wrote code to handle lowercase + one other version
+
+    #Check that the nulls line up consistently with this being the same field with inconsistent case in name
+    if jn[[json_field, lower_field]].isnull().sum(axis = 1).ne(1).any():
+      raise Exception('Apparent multicased JSON field does not align: some rows have values in both or neither spelling of the field.')
+    print(f'Fixing up apparent use of both {json_field} and {lower_field}', file = sys.stderr)
+
+    jn[lower_field] = jn[lower_field].combine_first(jn[json_field])
+    assert not jn[lower_field].isnull().any(), jn[jn[lower_field].isnull()][lower_field]
+    normalized_json_fields.append(lower_field)
+  json_fields = normalized_json_fields
+
+  df = df.join(jn[json_fields])
   df.apply(check_metadata, axis = 'columns') #Just a paranoia check that I am combining the dataframes correctly
   df = df.rename(columns = {x: f'{prefix}.{x}' for x in json_fields})
   df = df.drop(json_column, axis = 'columns')
