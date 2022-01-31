@@ -176,8 +176,12 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
         return (f'For path "{path}", the following should match:\n'
                 f'"{d}" in JSON at col "{json_column}"\n'
                 f'"{row[path]}" in col "{path}"')
-      if d is None: assert np.isnan(row[path]), errstring()
-      else:         assert d == row[path], errstring()
+      if d is None:
+        if not np.isnan(row[path]):
+          raise Exception(errstring())
+      else:
+        if d != row[path]:
+          raise Exception(errstring())
 
   df[json_column] = df[json_column].apply(json_parser)
   jn = pd.json_normalize(df[json_column])#, meta = json_fields)[json_fields]
@@ -204,7 +208,7 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
   json_fields = normalized_json_fields
 
   df = df.join(jn[json_fields])
-  df.apply(check_metadata, axis = 'columns') #Just a paranoia check that I am combining the dataframes correctly
+  df.apply(check_metadata, axis = 'columns') #Check that the metadata looks right -- has caught real problems at least once
   df = df.rename(columns = {x: f'{prefix}.{x}' for x in json_fields})
   df = df.drop(json_column, axis = 'columns')
   return df
