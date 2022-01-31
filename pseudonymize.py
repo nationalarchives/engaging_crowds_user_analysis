@@ -81,25 +81,25 @@ WORKFLOW_SUBJECT_KEEPERS = {
   19385: _RBGE_SUBJECT_KEEPERS,
 }
 
-#Workflow version to keep (will remove rows where the workflow with name 'key' has version less than 'value')
+#Workflow version to keep (will remove rows where the workflow with name 'key' has version not in 'value')
 WORKFLOW_KEEPERS = {
-  18504: 132.205,
-  18505: 56.83,
-  18611: 3.1,
-  18612: 3.1,
-  18613: 3.1,
-  18614: 3.1,
-  18616: 3.1,
-  18617: 3.1,
-  18618: 3.1,
-  18619: 3.1,
-  18621: 3.1,
-  18622: 3.1,
-  18623: 3.1,
-  18624: 3.1,
-  18625: 3.1,
-  19381: 122.201,
-  19385: 46.223,
+  18504: [132.205],
+  18505: [56.83],
+  18611: [3.1],
+  18612: [3.1, 4.1],
+  18613: [3.1],
+  18614: [3.1],
+  18616: [3.1],
+  18617: [3.1],
+  18618: [3.1],
+  18619: [3.1],
+  18621: [3.1],
+  18622: [3.1],
+  18623: [3.1],
+  18624: [3.1, 6.4],
+  18625: [3.1],
+  19381: [122.201],
+  19385: [46.223],
 }
 
 #Based on displayed timestamp in the emails as I received them
@@ -268,7 +268,7 @@ def read_workflow(workflow):
 
   minimal_pseudonyms[workflow] = df #Store the original classification
 
-  df = df[df['workflow_version'] >= WORKFLOW_KEEPERS[workflow]]
+  df = df[df['workflow_version'].isin(WORKFLOW_KEEPERS[workflow])]
   df = df.reset_index(drop = True) #Reset the index so that we line up with the JSON expansion
 
   df['START'] = WORKFLOW_STARTSTAMP[workflow]
