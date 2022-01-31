@@ -265,6 +265,10 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
 def read_workflow(workflow):
   csv_file = f'{args.exports}/{WORKFLOW_NAMES[workflow]}-classifications.csv'
   df = pd.read_csv(csv_file)
+  if not df.workflow_id.unique().size == 1:
+    raise Exception(f'Too many workflow ids in {csv_file}')
+  if df.workflow_id.iloc[0] != workflow:
+    raise Exception(f'Expected workflow id {workflow} in CSV file {csv_file}. Got {df.workflow_id.iloc[0]}.')
 
   minimal_pseudonyms[workflow] = df #Store the original classification
 
