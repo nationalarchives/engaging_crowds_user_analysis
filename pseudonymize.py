@@ -17,50 +17,89 @@ from collections import Counter
 #Dictionary storing individual CSV files minimally altered
 minimal_pseudonyms = {}
 
+WORKFLOW_NAMES = {
+  18504: 'meetings',
+  18505: 'people',
+  18611: '1-admission-number',
+  18612: '2-date-of-entry',
+  18613: '3-name',
+  18614: 'quality-dd',
+  18616: '5-age',
+  18617: '7-place-of-birth-nationality',
+  18618: '10-where-from',
+  18619: 'years-at-sea',
+  18621: '8-ship-ship-or-place-of-employment-last-ship',
+  18622: '11-nature-of-complaint',
+  18623: '12-date-of-discharge',
+  18624: 'how-disposed-of-dd',
+  18625: '14-number-of-days-in-hospital',
+  19381: 'geography',
+  19385: 'latitude-longitude'
+}
+
+EARLY_WORKFLOW_NAMES = {
+  18504: 'meetings',
+  18505: 'people',
+  18611: '1-admission-number',
+  18612: '2-date-of-entry',
+  18613: '3-name',
+  18614: '4-quality',
+  18616: '5-age',
+  18617: '6-place-of-birth',
+  18618: '7-port-sailed-out-of',
+  18619: '8-years-at-sea',
+  18621: '9-last-services',
+  18622: '10-under-what-circumstances-admitted-or-nature-of-complaint',
+  18623: '11-date-of-discharge',
+  18624: '12-how-disposed-of',
+  18625: '13-number-of-days-victualled'
+}
+#WORKFLOW_NAMES = EARLY_WORKFLOW_NAMES #Just for testing with the older inputs, against the older logs
+
 #Nested JSON data to keep (sits insides cells, will be expanded out to columns)
 METADATA_KEEPERS = ['started_at', 'finished_at', 'utc_offset']
 ALL_SUBJECT_KEEPERS = ['#priority', 'retired.retired_at']
 _HMS_NHS_SUBJECT_KEEPERS = ['Filename']
 _RBGE_SUBJECT_KEEPERS = ['Botanist','Group','Format','Species','Barcode']
 WORKFLOW_SUBJECT_KEEPERS = {
-  'meetings':                                               ['Date', 'Page', 'Catalogue'],
-  'people':                                                    ['Surnames starting with'],
-  '1-admission-number':                                          _HMS_NHS_SUBJECT_KEEPERS,
-  '2-date-of-entry':                                             _HMS_NHS_SUBJECT_KEEPERS,
-  '3-name':                                                      _HMS_NHS_SUBJECT_KEEPERS,
-  '4-quality':                                                   _HMS_NHS_SUBJECT_KEEPERS,
-  '5-age':                                                       _HMS_NHS_SUBJECT_KEEPERS,
-  '6-place-of-birth':                                            _HMS_NHS_SUBJECT_KEEPERS,
-  '7-port-sailed-out-of':                                        _HMS_NHS_SUBJECT_KEEPERS,
-  '8-years-at-sea':                                              _HMS_NHS_SUBJECT_KEEPERS,
-  '9-last-services':                                             _HMS_NHS_SUBJECT_KEEPERS,
-  '10-under-what-circumstances-admitted-or-nature-of-complaint': _HMS_NHS_SUBJECT_KEEPERS,
-  '11-date-of-discharge':                                        _HMS_NHS_SUBJECT_KEEPERS,
-  '12-how-disposed-of':                                          _HMS_NHS_SUBJECT_KEEPERS,
-  '13-number-of-days-victualled':                                _HMS_NHS_SUBJECT_KEEPERS,
-  'geography':                                                      _RBGE_SUBJECT_KEEPERS,
-  'latitude-longitude':                                             _RBGE_SUBJECT_KEEPERS,
+  18504: ['Date', 'Page', 'Catalogue'],
+  18505: ['Surnames starting with'],
+  18611: _HMS_NHS_SUBJECT_KEEPERS,
+  18612: _HMS_NHS_SUBJECT_KEEPERS,
+  18613: _HMS_NHS_SUBJECT_KEEPERS,
+  18614: _HMS_NHS_SUBJECT_KEEPERS,
+  18616: _HMS_NHS_SUBJECT_KEEPERS,
+  18617: _HMS_NHS_SUBJECT_KEEPERS,
+  18618: _HMS_NHS_SUBJECT_KEEPERS,
+  18619: _HMS_NHS_SUBJECT_KEEPERS,
+  18621: _HMS_NHS_SUBJECT_KEEPERS,
+  18622: _HMS_NHS_SUBJECT_KEEPERS,
+  18623: _HMS_NHS_SUBJECT_KEEPERS,
+  18624: _HMS_NHS_SUBJECT_KEEPERS,
+  18625: _HMS_NHS_SUBJECT_KEEPERS,
+  19381: _RBGE_SUBJECT_KEEPERS,
+  19385: _RBGE_SUBJECT_KEEPERS,
 }
 
 #Workflow version to keep (will remove rows where the workflow with name 'key' has version less than 'value')
 WORKFLOW_KEEPERS = {
-  'meetings': 132.205,
-  'people': 56.83,
-  '1-admission-number': 3.1,
-  '2-date-of-entry': 3.1,
-  '3-name': 3.1,
-  '4-quality': 3.1,
-  '5-age': 3.1,
-  '6-place-of-birth': 3.1,
-  '7-port-sailed-out-of': 3.1,
-  '8-years-at-sea': 3.1,
-  '9-last-services': 3.1,
-  '10-under-what-circumstances-admitted-or-nature-of-complaint': 3.1,
-  '11-date-of-discharge': 3.1,
-  '12-how-disposed-of': 3.1,
-  '13-number-of-days-victualled': 3.1,
-  'geography': 122.201,
-  'latitude-longitude': 46.223,
+  18504: 132.205,
+  18505: 56.83,
+  18611: 3.1,
+  18612: 3.1,
+  18613: 3.1,
+  18614: 3.1,
+  18616: 3.1,
+  18617: 3.1,
+  18618: 3.1,
+  18619: 3.1,
+  18621: 3.1,
+  18622: 3.1,
+  18623: 3.1,
+  18624: 3.1,
+  18625: 3.1,
+  19381: 122.201,
+  19385: 46.223,
 }
 
 #Based on displayed timestamp in the emails as I received them
@@ -68,29 +107,30 @@ HMS_NHS_LAUNCH_EMAIL_STAMP = '2021-06-29T16:19:00.000000Z'
 SB_LAUNCH_EMAIL_STAMP = '2021-11-16T17:30:00.000000Z'
 RBGE_LAUNCH_EMAIL_STAMP = '2022-01-11T17:11:00.000000Z'
 WORKFLOW_STARTSTAMP = {
-  'meetings': SB_LAUNCH_EMAIL_STAMP,
-  'people': SB_LAUNCH_EMAIL_STAMP,
-  '1-admission-number': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  '2-date-of-entry': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  '3-name': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  '4-quality': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  '5-age': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  '6-place-of-birth': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  '7-port-sailed-out-of': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  '8-years-at-sea': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  '9-last-services': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  '10-under-what-circumstances-admitted-or-nature-of-complaint': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  '11-date-of-discharge': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  '12-how-disposed-of': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  '13-number-of-days-victualled': HMS_NHS_LAUNCH_EMAIL_STAMP,
-  'geography': RBGE_LAUNCH_EMAIL_STAMP,
-  'latitude-longitude': RBGE_LAUNCH_EMAIL_STAMP,
+  18504: SB_LAUNCH_EMAIL_STAMP,
+  18505: SB_LAUNCH_EMAIL_STAMP,
+  18611: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  18612: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  18613: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  18614: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  18616: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  18617: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  18618: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  18619: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  18621: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  18622: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  18623: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  18624: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  18625: HMS_NHS_LAUNCH_EMAIL_STAMP,
+  19381: RBGE_LAUNCH_EMAIL_STAMP,
+  19385: RBGE_LAUNCH_EMAIL_STAMP,
 }
 
 parser = argparse.ArgumentParser()
 parser.add_argument('workflows',
                     nargs = '*',
-                    default = WORKFLOW_KEEPERS.keys(),
+                    type = int,
+                    default = WORKFLOW_NAMES.keys(),
                     help = 'Workflows to pseudonymise')
 parser.add_argument('--exports', '-e',
                    default = 'exports',
@@ -223,7 +263,8 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
 
 #Read workflow's CSV file into a dataframe and do workflow-specific transformations
 def read_workflow(workflow):
-  df = pd.read_csv(f'{args.exports}/{workflow}-classifications.csv')
+  csv_file = f'{args.exports}/{WORKFLOW_NAMES[workflow]}-classifications.csv'
+  df = pd.read_csv(csv_file)
 
   minimal_pseudonyms[workflow] = df #Store the original classification
 
@@ -282,6 +323,6 @@ def main():
     v['KEEP'] = v['metadata'].apply(lambda x: json.loads(x)['started_at'] >= WORKFLOW_STARTSTAMP[k])
     v = v[v['KEEP']]
     v = v.drop('KEEP', axis = 'columns')
-    v.to_csv(f'secrets/{k}-classifications.csv', index = False)
+    v.to_csv(f'secrets/{WORKFLOW_NAMES[k]}-classifications.csv', index = False)
 
 main()
