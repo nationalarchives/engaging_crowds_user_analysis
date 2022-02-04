@@ -1,5 +1,7 @@
 import pandas as pd
 
+HEAD = None
+
 #Opted to go with 'str' over 'category' -- while category seems to make sense in many cases, it sometimes behaves
 #in confusingly different ways (e.g. seemingly not respecting filters). While this surely all makes sense given
 #full understanding of the model, I'll keep it simple and use str.

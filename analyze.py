@@ -1,5 +1,13 @@
-import pandas as pd
+#!/usr/bin/env python3
+
 import data as d
+import util as u
+from analyze_time import start_times
+
+import pandas as pd
+
+import os
+import shutil
 
 def get_project(x):
     for k, v in d.PROJECTS.items():
@@ -47,3 +55,51 @@ def prepare(class_df):
     ('Negative duration', negative_df, d.TIME_COLS, 'Uninterpretable'),
     ('Anonymous', anon_df, ['pseudonym'], 'May not be an individual; hashes can change, resulting in inconsistent identification across workflows/projects'),
   )
+
+if __name__ == '__main__':
+  SAMPLE = 10
+  d.HEAD = u.git_HEAD()
+  if os.path.isdir(f'./secrets/graphs/{d.HEAD}/'):
+    shutil.rmtree(f'./secrets/graphs/{d.HEAD}/')
+  os.makedirs(f'./secrets/graphs/{d.HEAD}')
+
+  u.Logger(f'./secrets/graphs/{d.HEAD}/log.txt')
+
+  print('Loading data')
+  original_df = load()
+  print('Preparing data')
+  class_df, subsets, *deletions = prepare(original_df.copy())
+
+  full_size = len(class_df)
+  original_full_size = len(original_df)
+
+  print('Discards')
+  print('-' * len('discards'))
+  print()
+  discarded_count = 0
+  for label, df, cols, justification in deletions:
+    size = len(df)
+    discarded_count += size
+    if SAMPLE < size:
+      df = df.sample(SAMPLE)
+      sample = SAMPLE
+    else:
+      sample = size
+    print(f'{label} (showing {sample}/{size})')
+    print('Justification:', justification)
+    print(f'Discards a further {size} of original {original_full_size} classifications ({size / original_full_size:.2%})')
+    print(df[['workflow_name', 'classification_id', 'subject_ids'] + cols])
+    print()
+
+  print(f'Discarded a total of {discarded_count} ({discarded_count/original_full_size:.2%}) of {original_full_size:,} classifications.')
+  print('\n')
+
+  print('Subsets of undiscarded data')
+  print('-' * len('subsets of undiscarded data'))
+  print()
+  for k, v in subsets.items():
+    c = len(v)
+    print(f'{k + ":":10}{c:7,} classifications ({c / full_size:06.2%} of {full_size} undiscarded classifications.)')
+  print('\n\n')
+
+  start_times(class_df.copy(), subsets)
