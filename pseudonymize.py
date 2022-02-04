@@ -126,6 +126,8 @@ WORKFLOW_STARTSTAMP = {
   19385: RBGE_LAUNCH_EMAIL_STAMP,
 }
 
+STOPSTAMP = '2021-02-01T00:00:00.000000Z'
+
 parser = argparse.ArgumentParser()
 parser.add_argument('workflows',
                     nargs = '*',
@@ -328,6 +330,9 @@ def main():
   df['md.started_at'] = df['md.started_at'].astype(np.datetime64)
   df = df[df['md.started_at'] >= df['START']]
   df = df.drop('START', axis = 'columns')
+
+  df['md.finished_at'] = df['md.finished_at'].astype(np.datetime64)
+  df = df[df['md.finished_at'] < STOPSTAMP]
 
   df.to_csv('all_classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
 
