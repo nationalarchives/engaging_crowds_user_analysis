@@ -126,7 +126,7 @@ WORKFLOW_STARTSTAMP = {
   19385: RBGE_LAUNCH_EMAIL_STAMP,
 }
 
-STOPSTAMP = '2021-02-01T00:00:00.000000Z'
+STOPSTAMP = '2022-02-01T00:00:00.000000'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('workflows',
@@ -332,13 +332,14 @@ def main():
   df = df.drop('START', axis = 'columns')
 
   df['md.finished_at'] = df['md.finished_at'].astype(np.datetime64)
-  df = df[df['md.finished_at'] < STOPSTAMP]
+  df = df[df['md.finished_at'] < np.datetime64(STOPSTAMP)]
 
   df.to_csv('all_classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
 
   with open(args.dictionary, 'w') as f:
     f.write(json.dumps(identities))
 
+  #This should be updated for STOPSTAMP, but I'm anyway not using it at the moment.
   for k, v in minimal_pseudonyms.items():
     v['KEEP'] = v['metadata'].apply(lambda x: json.loads(x)['started_at'] >= WORKFLOW_STARTSTAMP[k])
     v = v[v['KEEP']]
