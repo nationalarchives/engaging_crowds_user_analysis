@@ -85,14 +85,13 @@ def start_times(start_df, subsets):
       fig.write_image(filepath + '/static/' + filename + '_box.svg', width = 1600, height = 1200)
       fig.write_html(filepath + '/dynamic/' + filename + '_box.html')
 
+    #Compute the heatmaps of when classifications happened
     title = f'{label} per weekday and period, in local time ({n_v} volunteers)  [{u.git_condition()}]'
     if n_v != n_class:
         mean_v = volunteer_classification_counts.mean()
         std_v = volunteer_classification_counts.std()
         med_v = volunteer_classification_counts.median()
         title += f'<br>{n_class} classifications ({n_v} volunteers, {n_class} classifications, median = {med_v}, mean = {mean_v:.2f} (\u03C3 = {std_v:.2f}))'
-
-    #Compute the heatmaps of when classifications happened
     fig = px.density_heatmap(data, x = 'day', y = 'period', z = 'project',
                               histnorm = 'percent', histfunc = 'count',
                               marginal_x = 'histogram', marginal_y = 'histogram',
