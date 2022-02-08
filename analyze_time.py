@@ -60,6 +60,8 @@ def start_times(start_df, subsets):
     n_class = len(data)
 
     if kwargs.get('box'):
+      title = f'{label} ({n_v} volunteers)'
+      print(title)
       description = volunteer_classification_counts.describe([0.25, 0.75, 0.9, 0.95, 0.99])
       q1 = description['25%']
       q3 = description['75%']
@@ -68,14 +70,28 @@ def start_times(start_df, subsets):
       upper_outer_fence = q3 + iqr * 3
       lower_fence = q1 - iqr * 1.5
       lower_inner_fence = q1 - iqr * 3
+      print('count:', description['count'])
+      print('std:  ', description['std'])
+      print('< / == / >')
+      description = description.append(pd.Series({
+        'mean +  \u03C3': description['mean'] + description['std'],
+        'mean + 2\u03C3': description['mean'] + 2 * description['std'],
+        'upper fence': upper_fence,
+        'upper outer fence': upper_outer_fence,
+      }))
+      for k, v in description.iteritems():
+        if k == 'count' or k == 'std': continue
+        lt = len(volunteer_classification_counts[volunteer_classification_counts.lt(v)])
+        eq = len(volunteer_classification_counts[volunteer_classification_counts.eq(v)])
+        gt = len(volunteer_classification_counts[volunteer_classification_counts.gt(v)])
+        p_lt = lt / n_v
+        p_eq = eq / n_v
+        p_gt = gt / n_v
+        print(f'{k+":":20} {v:7.02f} classifications, {lt:7}/{eq:7}/{gt:7} volunteers ({p_lt:03.02%}/{p_eq:03.02%}/{p_gt:03.02%} of all volunteers)')
 
       description = str(description)
-      description = description[:description.rfind('\n')]
-      description += f'Upper outer fence: {upper_outer_fence}\nUpper fence: {upper_fence}\nLower fence: {lower_fence}\nLower inner fence: {lower_inner_fence}'
-      title = f'{label} ({n_v} volunteers)'
-      print(title)
-      print(description)
-      title += '<br>' + description.replace('\n', '<br>')
+      description = description[:description.rfind('\n')].replace('\n', '<br>')
+      title += '<br>' + description
 
       #Show the spread of volunteer classification counts
       fig = px.box(volunteer_classification_counts, #x = 'workflow_name', y = session_df.duration.apply(lambda x: x.ceil('T').total_seconds()/60),
