@@ -49,7 +49,7 @@ def start_times(start_df, subsets):
 
   #Now do the drawing
 
-  def drawit(label, data, filepath, filename):
+  def drawit(label, data, filepath, filename, **kwargs):
     #If I understand correctly, it doesn't matter what 'z' is here, as I am just counting the cells where day and hour intersect
     #As a result, I am displaying the bar chart of classifications per day at the top (marginal_x) and the bar chart of
     #classifications per period on the right (marginal_y).
@@ -59,7 +59,32 @@ def start_times(start_df, subsets):
     n_v = len(volunteer_classification_counts)
     n_class = len(data)
 
-    title = f'{label} ({n_v} volunteers)'
+    if kwargs.get('box'):
+      description = volunteer_classification_counts.describe([0.25, 0.75, 0.9, 0.95, 0.99])
+      q1 = description['25%']
+      q3 = description['75%']
+      iqr = q3 - q1
+      upper_fence = q3 + iqr * 1.5
+      upper_outer_fence = q3 + iqr * 3
+      lower_fence = q1 - iqr * 1.5
+      lower_inner_fence = q1 - iqr * 3
+
+      description = str(description)
+      description = description[:description.rfind('\n')]
+      description += f'Upper outer fence: {upper_outer_fence}\nUpper fence: {upper_fence}\nLower fence: {lower_fence}\nLower inner fence: {lower_inner_fence}'
+      title = f'{label} ({n_v} volunteers)'
+      print(title)
+      print(description)
+      title += '<br>' + description.replace('\n', '<br>')
+
+      #Show the spread of volunteer classification counts
+      fig = px.box(volunteer_classification_counts, #x = 'workflow_name', y = session_df.duration.apply(lambda x: x.ceil('T').total_seconds()/60),
+                   points = 'suspectedoutliers', notched = True,
+                   title = title, labels = { 'y': 'Classifications', 'x': ''}, log_y = True)
+      fig.update_traces(quartilemethod = 'linear')
+      fig.write_image(filepath + '/static/' + filename + '_box.svg', width = 1600, height = 1200)
+      fig.write_html(filepath + '/dynamic/' + filename + '_box.html')
+
     if n_v != n_class:
         mean_v = volunteer_classification_counts.mean()
         std_v = volunteer_classification_counts.std()
@@ -80,9 +105,9 @@ def start_times(start_df, subsets):
     #Record the data used to make these graphs
     data.to_csv(filepath + '/' + filename + '.csv')
 
-  for label, df in ('all classifiers', start_df), \
-                   ('mono classifiers', start_df.loc[subsets['mono']]), \
-                   ('multi classifiers', start_df.loc[subsets['plural']]):
+  for label, df, box in ('all classifiers', start_df, True), \
+                        ('mono classifiers', start_df.loc[subsets['mono']], False), \
+                        ('multi classifiers', start_df.loc[subsets['plural']], False):
     proj_path = u.path_norm(f'secrets/graphs/{d.HEAD}/class_times/project/{label}')
     flow_path = u.path_norm(f'secrets/graphs/{d.HEAD}/class_times/workflow/{label}')
     type_path = u.path_norm(f'secrets/graphs/{d.HEAD}/class_times/workflow_type/{label}')
@@ -97,14 +122,14 @@ def start_times(start_df, subsets):
     #By project
     for project, wids in d.PROJECTS.items():
       print(f'  ... for project {project!r}')
-      drawit(f'{title}<br>All workflows in project {project!r}', df[df.workflow_id.isin(wids)], proj_path, u.fnam_norm(project))
+      drawit(f'{title}<br>All workflows in project <b>{project!r}</b>', df[df.workflow_id.isin(wids)], proj_path, u.fnam_norm(project), box = box)
 
     #By workflow
     for workflow, wid in list(zip(d.WORKFLOWS, d.WORKFLOWS.index)):
       print(f'  ... for workflow {workflow!r}')
-      drawit(f'{title}<br>Workflow {workflow}', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow))
+      drawit(f'{title}<br>Workflow <b>{workflow}</b>', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow), box = box)
     
     #By workflow type
     for w_type, wids in d.WORKFLOW_TYPES_BACKMAP.items():
       print(f'  ... for workflow type {w_type!r}')
-      drawit(f'{title}<br>All workflows of type {w_type}', df[df.workflow_id.isin(wids)], type_path, u.fnam_norm(w_type))
+      drawit(f'{title}<br>All workflows of type <b>{w_type}</b>', df[df.workflow_id.isin(wids)], type_path, u.fnam_norm(w_type), box = box)
