@@ -67,6 +67,7 @@ def start_times(start_df, subsets):
         title += f'<br>{n_class} classifications ({n_v} volunteers, {n_class} classifications, median = {med_v}, mean = {mean_v:.2f} (\u03C3 = {std_v:.2f}))'
     title += f'  [{u.git_condition()}]'
 
+    #Compute the heatmaps of when classifications happened
     fig = px.density_heatmap(data, x = 'day', y = 'period', z = 'project',
                               histnorm = 'percent', histfunc = 'count',
                               marginal_x = 'histogram', marginal_y = 'histogram',
@@ -75,6 +76,8 @@ def start_times(start_df, subsets):
     #pio.show(fig, renderer = 'browser')
     fig.write_image(filepath + '/static/' + filename + '.svg', width = 1600, height = 1200)
     fig.write_html(filepath + '/dynamic/' + filename + '.html')
+
+    #Record the data used to make these graphs
     data.to_csv(filepath + '/' + filename + '.csv')
 
   for label, df in ('all classifiers', start_df), \
