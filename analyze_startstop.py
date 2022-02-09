@@ -25,7 +25,7 @@ def drawit(label, df, filepath, filename):
   dup_mask = active.index.duplicated(keep = 'last') #Identify the duplicates -- last occurence will be marked False, others True (re https://www.kite.com/python/answers/how-to-remove-rows-in-a-pandas-dataframe-with-duplicate-indices-in-python)
   dup_mask = ~dup_mask #Invert the mask so that last entries are True, others False
   active = active[dup_mask]
-  full_index = pd.date_range(active.index.min(), active.index.max()) #Ensure that we have an explicit point for every date (I think it spaces out correctly -- the bar charts above certainly do -- but it is nice to be able to mouseover and see every point)
+  full_index = pd.date_range(active.index.min(), '2022-01-31') #Ensure that we have an explicit point for every date (I think it spaces out correctly -- the bar charts above certainly do -- but it is nice to be able to mouseover and see every point)
   active = active.reindex(full_index, method = 'ffill')
   fig = px.line(active, title = f'{label}<br>Volunteers on date', color=px.Constant('Total'))
 
