@@ -145,7 +145,7 @@ def start_times(start_df, subsets):
 
   for label, df, box in ('all classifiers', start_df, True), \
                         ('mono classifiers', start_df.loc[subsets['mono']], False), \
-                        ('multi classifiers', start_df.loc[subsets['plural']], False):
+                        ('multi classifiers', start_df.loc[subsets['plural']], True):
     proj_path = u.path_norm(f'secrets/graphs/{d.HEAD}/class_times/project/{label}')
     flow_path = u.path_norm(f'secrets/graphs/{d.HEAD}/class_times/workflow/{label}')
     type_path = u.path_norm(f'secrets/graphs/{d.HEAD}/class_times/workflow_type/{label}')
