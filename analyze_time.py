@@ -8,6 +8,7 @@ import plotly.io as pio
 import plotly.express as px
 
 import os
+from multiprocessing import Process
 
 def start_times(start_df, subsets):
 
@@ -60,8 +61,9 @@ def start_times(start_df, subsets):
     n_class = len(data)
 
     if kwargs.get('box'):
-      title = f'{label} ({n_v} volunteers)'
-      print(title)
+      logfile = open(filepath + '/' + filename + '.txt', 'x')
+      title = f'{label} ({n_v} volunteers)   [{u.git_condition()}]'
+      print(title, file = logfile)
       description = volunteer_classification_counts.describe([0.25, 0.75, 0.9, 0.95, 0.99])
       q1 = description['25%']
       q3 = description['75%']
@@ -70,9 +72,9 @@ def start_times(start_df, subsets):
       upper_outer_fence = q3 + iqr * 3
       lower_fence = q1 - iqr * 1.5
       lower_inner_fence = q1 - iqr * 3
-      print('count:', description['count'])
-      print('std:  ', description['std'])
-      print('< / == / >')
+      print('count:', description['count'], file = logfile)
+      print('std:  ', description['std'], file = logfile)
+      print('< / == / >', file = logfile)
       description = description.append(pd.Series({
         'mean +  \u03C3': description['mean'] + description['std'],
         'mean + 2\u03C3': description['mean'] + 2 * description['std'],
@@ -87,7 +89,8 @@ def start_times(start_df, subsets):
         p_lt = lt / n_v
         p_eq = eq / n_v
         p_gt = gt / n_v
-        print(f'{k+":":20} {v:7.02f} classifications, {lt:7}/{eq:7}/{gt:7} volunteers ({p_lt:03.02%}/{p_eq:03.02%}/{p_gt:03.02%} of all volunteers)')
+        print(f'{k+":":20} {v:7.02f} classifications, {lt:7}/{eq:7}/{gt:7} volunteers ({p_lt:03.02%}/{p_eq:03.02%}/{p_gt:03.02%} of all volunteers)', file = logfile)
+      logfile.close()
 
       description = str(description)
       description = description[:description.rfind('\n')].replace('\n', '<br>')
@@ -143,6 +146,7 @@ def start_times(start_df, subsets):
     #Record the data used to make these graphs
     data.to_csv(filepath + '/' + filename + '.csv')
 
+  procs = []
   for label, df, box in ('all classifiers', start_df, True), \
                         ('mono classifiers', start_df.loc[subsets['mono']], False), \
                         ('multi classifiers', start_df.loc[subsets['plural']], True):
@@ -160,14 +164,21 @@ def start_times(start_df, subsets):
     #By project
     for project, wids in d.PROJECTS.items():
       print(f'  ... for project {project!r}')
-      drawit(f'{title}<br>All workflows in project <b>{project!r}</b>', df[df.workflow_id.isin(wids)], proj_path, u.fnam_norm(project), box = box)
+      p = Process(target = drawit, args = (f'{title}<br>All workflows in project <b>{project!r}</b>', df[df.workflow_id.isin(wids)], proj_path, u.fnam_norm(project)), kwargs = {'box': box})
+      p.start()
+      procs.append(p)
 
     #By workflow
     for workflow, wid in list(zip(d.WORKFLOWS, d.WORKFLOWS.index)):
       print(f'  ... for workflow {workflow!r}')
-      drawit(f'{title}<br>Workflow <b>{workflow}</b>', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow), box = box)
+      p = Process(target = drawit, args = (f'{title}<br>Workflow <b>{workflow}</b>', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow)), kwargs = {'box': box})
+      p.start()
+      procs.append(p)
     
     #By workflow type
     for w_type, wids in d.WORKFLOW_TYPES_BACKMAP.items():
       print(f'  ... for workflow type {w_type!r}')
-      drawit(f'{title}<br>All workflows of type <b>{w_type}</b>', df[df.workflow_id.isin(wids)], type_path, u.fnam_norm(w_type), box = box)
+      p = Process(target = drawit, args = (f'{title}<br>All workflows of type <b>{w_type}</b>', df[df.workflow_id.isin(wids)], type_path, u.fnam_norm(w_type)), kwargs = {'box': box})
+      p.start()
+      procs.append(p)
+  for p in procs: p.join()
