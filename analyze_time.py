@@ -105,8 +105,8 @@ def start_times(start_df, subsets):
       #TODO All lot of this should very much be factored out to some subroutine
       low_pseudonyms  = volunteer_classification_counts[volunteer_classification_counts.le(q3)].index.values
       high_pseudonyms = volunteer_classification_counts[volunteer_classification_counts.gt(q3)].index.values
-      title = f'{label} per weekday and period, in local time ({len(low_pseudonyms)} volunteers)  [{u.git_condition()}]'
-      title += '<br>Volunteers <= 3rd quartile classifications'
+      title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
+      title += f'<br>Volunteers <= 3rd quartile classifications ({len(low_pseudonyms)} volunteers doing up to {int(q3)} classifications)'
       fig = px.density_heatmap(data[data.pseudonym.isin(low_pseudonyms)], x = 'day', y = 'period', z = 'project',
                                histnorm = 'percent', histfunc = 'count',
                                marginal_x = 'histogram', marginal_y = 'histogram',
@@ -114,8 +114,8 @@ def start_times(start_df, subsets):
                                category_orders = {'day': DAYS, 'period': PERIODS})
       fig.write_image(filepath + '/static/' + filename + '_q3.svg', width = 1600, height = 1200)
       fig.write_html(filepath + '/dynamic/' + filename + '_q3.html')
-      title = f'{label} per weekday and period, in local time ({len(high_pseudonyms)} volunteers)  [{u.git_condition()}]'
-      title += '<br>Volunteers > 3rd quartile classifications'
+      title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
+      title += f'<br>Volunteers > 3rd quartile classifications ({len(high_pseudonyms)} volunteers doing over {int(q3)} classifications ({volunteer_classification_counts.loc[high_pseudonyms].min()} to {volunteer_classification_counts.loc[high_pseudonyms].max()} classifications))'
       fig = px.density_heatmap(data[data.pseudonym.isin(high_pseudonyms)], x = 'day', y = 'period', z = 'project',
                                histnorm = 'percent', histfunc = 'count',
                                marginal_x = 'histogram', marginal_y = 'histogram',
