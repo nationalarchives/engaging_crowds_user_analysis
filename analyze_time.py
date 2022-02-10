@@ -102,6 +102,7 @@ def start_times(start_df, subsets):
                    title = title, labels = { 'y': 'Classifications', 'x': ''}, log_y = True)
       fig.update_traces(quartilemethod = 'linear')
       fig.write_image(filepath + '/static/' + filename + '_box.svg', width = 1600, height = 1200)
+      fig.write_image(filepath + '/static/' + filename + '_box.png', width = 1600, height = 1200)
       fig.write_html(filepath + '/dynamic/' + filename + '_box.html')
 
       #Dump the heatmaps as cut by q3
@@ -116,6 +117,7 @@ def start_times(start_df, subsets):
                                title = title,
                                category_orders = {'day': DAYS, 'period': PERIODS})
       fig.write_image(filepath + '/static/' + filename + '_q3.svg', width = 1600, height = 1200)
+      fig.write_image(filepath + '/static/' + filename + '_q3.png', width = 1600, height = 1200)
       fig.write_html(filepath + '/dynamic/' + filename + '_q3.html')
       title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
       title += f'<br>Volunteers > 3rd quartile classifications ({len(high_pseudonyms)} volunteers doing over {int(q3)} classifications ({volunteer_classification_counts.loc[high_pseudonyms].min()} to {volunteer_classification_counts.loc[high_pseudonyms].max()} classifications))'
@@ -125,6 +127,7 @@ def start_times(start_df, subsets):
                                title = title,
                                category_orders = {'day': DAYS, 'period': PERIODS})
       fig.write_image(filepath + '/static/' + filename + '_q4.svg', width = 1600, height = 1200)
+      fig.write_image(filepath + '/static/' + filename + '_q4.png', width = 1600, height = 1200)
       fig.write_html(filepath + '/dynamic/' + filename + '_q4.html')
 
     #Compute the heatmaps of when classifications happened
@@ -141,6 +144,7 @@ def start_times(start_df, subsets):
                               category_orders = {'day': DAYS, 'period': PERIODS})
     #pio.show(fig, renderer = 'browser')
     fig.write_image(filepath + '/static/' + filename + '.svg', width = 1600, height = 1200)
+    fig.write_image(filepath + '/static/' + filename + '.png', width = 1600, height = 1200)
     fig.write_html(filepath + '/dynamic/' + filename + '.html')
 
     #Record the data used to make these graphs

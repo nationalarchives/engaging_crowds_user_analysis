@@ -13,10 +13,12 @@ def drawit(label, df, filepath, filename):
 
   fig = px.bar(first_time, title = f'{label}<br>Number of volunteers making first classification on date')
   fig.write_image(filepath + '/static/' + filename + '_firstday.svg', width = 1600, height = 1200)
+  fig.write_image(filepath + '/static/' + filename + '_firstday.png', width = 1600, height = 1200)
   fig.write_html(filepath + '/dynamic/' + filename + '_firstday.html')
 
   fig = px.bar(last_time, title = f'{label}<br>Number of volunteers making final classification on date')
   fig.write_image(filepath + '/static/' + filename + '_lastday.svg', width = 1600, height = 1200)
+  fig.write_image(filepath + '/static/' + filename + '_lastday.png', width = 1600, height = 1200)
   fig.write_html(filepath + '/dynamic/' + filename + '_lastday.html')
 
   #Compute total volunteers on any given data
@@ -34,6 +36,7 @@ def drawit(label, df, filepath, filename):
   fig = fig.add_bar(x = gain.index, y = gain.values, name = 'Gain')
 
   fig.write_image(filepath + '/static/' + filename + '_gain.svg', width = 1600, height = 1200)
+  fig.write_image(filepath + '/static/' + filename + '_gain.png', width = 1600, height = 1200)
   fig.write_html(filepath + '/dynamic/' + filename + '_gain.html')
 
 
