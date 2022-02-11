@@ -39,6 +39,7 @@ def drawit(label, df, filepath, filename):
   fig.write_image(filepath + '/static/' + filename + '_gain.png', width = 1600, height = 1200)
   fig.write_html(filepath + '/dynamic/' + filename + '_gain.html')
 
+  return active
 
 def start_stop_dates(df, subsets):
   print('Computing first and last classification dates')
@@ -60,11 +61,35 @@ def start_stop_dates(df, subsets):
     procs.append(p)
 
   #By workflow
+  actives = {}
   for workflow, wid in list(zip(d.WORKFLOWS, d.WORKFLOWS.index)):
     print(f'  ... for workflow {workflow!r}')
-    p = Process(target = drawit, args = (f'Workflow <b>{workflow}</b>   [{u.git_condition()}]<br>UTC dates', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow)))
-    p.start()
-    procs.append(p)
+    if wid in actives: raise Exception()
+    actives[wid] = drawit(f'Workflow <b>{workflow}</b>   [{u.git_condition()}]<br>UTC dates', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow))
+
+  for project, wids in d.PROJECTS.items():
+    import plotly.graph_objects as go
+    fig = go.Figure()
+    fig.update_layout(title = f'Active volunteers on {project}')
+    for wid in wids:
+      fig.add_trace(go.Scatter(x = actives[wid].index, y = actives[wid].values, name = d.WORKFLOWS[wid]))
+    fig.write_image(proj_path + '/static/' + u.fnam_norm(project) + '_agg_gain.png', width = 1600, height = 1200)
+    fig.write_html(proj_path + '/dynamic/' + u.fnam_norm(project) + '_agg_gain.html')
+
+  special_workflow_map = {
+    'Numbers': [18611, 18616, 18619, 18625],
+    'Dates': [18612, 18623],
+    'Dropdowns': [18614, 18624],
+    'Nouns': [18613, 18617, 18618, 18621, 18622],
+  }
+
+  for w_type, t_wids in special_workflow_map.items():
+    fig = go.Figure()
+    fig.update_layout(title = f'Active volunteers on HMS NHS ({w_type})')
+    for t_wid in t_wids:
+      fig.add_trace(go.Scatter(x = actives[t_wid].index, y = actives[t_wid].values, name = d.WORKFLOWS[t_wid]))
+    fig.write_image(type_path + '/static/' + u.fnam_norm(w_type) + '_agg_gain.png', width = 1600, height = 1200)
+    fig.write_html(type_path + '/dynamic/' + u.fnam_norm(w_type) + '_agg_gain.html')
 
   #By workflow type
   for w_type, wids in d.WORKFLOW_TYPES_BACKMAP.items():
