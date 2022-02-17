@@ -35,6 +35,8 @@ def prepare(class_df):
   class_df['local.started_at'] = class_df['md.started_at'] + utc_offset
   class_df['local.finished_at'] = class_df['md.finished_at'] + utc_offset
 
+  pre_discards = class_df.copy()
+
   #Data to discard
   negative_df = class_df[class_df.duration.apply(lambda x: x.total_seconds()) < 0]
   class_df = class_df.drop(negative_df.index)
@@ -55,6 +57,7 @@ def prepare(class_df):
     },
     ('Negative duration', negative_df, d.TIME_COLS, 'Uninterpretable'),
     ('Anonymous', anon_df, ['pseudonym'], 'May not be an individual; hashes can change, resulting in inconsistent identification across workflows/projects'),
+    pre_discards
   )
 
 if __name__ == '__main__':
@@ -69,7 +72,7 @@ if __name__ == '__main__':
   print('Loading data')
   original_df = load()
   print('Preparing data')
-  class_df, subsets, *deletions = prepare(original_df.copy())
+  class_df, subsets, *deletions, undeleted_df = prepare(original_df.copy())
 
   full_size = len(class_df)
   original_full_size = len(original_df)
@@ -82,15 +85,20 @@ if __name__ == '__main__':
     size = len(df)
     discarded_count += size
     if SAMPLE < size:
-      df = df.sample(SAMPLE)
+      sample_df = df.sample(SAMPLE)
       sample = SAMPLE
     else:
+      sample_df = df
       sample = size
     print(f'{label} (showing {sample}/{size})')
     print('Justification:', justification)
     print(f'Discards a further {size} of original {original_full_size} classifications ({size / original_full_size:.2%})')
-    print(df[['workflow_name', 'classification_id', 'subject_ids'] + cols])
-    print()
+    print(sample_df[['workflow_name', 'classification_id', 'subject_ids'] + cols])
+    for breakdown in ['project', 'workflow_name']:
+      vc = pd.concat({'Discarded': df.value_counts(breakdown), 'of total': undeleted_df.value_counts(breakdown)}, axis = 1, verify_integrity = True).fillna(0)
+      vc['% discarded'] = 100 * vc.iloc[:, 0] / vc.iloc[:, 1]
+      print(f'Breakdown by {breakdown}')
+      print(vc)
 
   print(f'Discarded a total of {discarded_count} ({discarded_count/original_full_size:.2%}) of {original_full_size:,} classifications.')
   print('\n')
