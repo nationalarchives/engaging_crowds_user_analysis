@@ -54,7 +54,6 @@ EARLY_WORKFLOW_NAMES = {
   18624: '12-how-disposed-of',
   18625: '13-number-of-days-victualled'
 }
-#WORKFLOW_NAMES = EARLY_WORKFLOW_NAMES #Just for testing with the older inputs, against the older logs
 
 #Nested JSON data to keep (sits insides cells, will be expanded out to columns)
 METADATA_KEEPERS = ['started_at', 'finished_at', 'utc_offset']
@@ -152,8 +151,8 @@ if os.path.exists(args.dictionary):
     identities = json.loads(f.read())
 
     #paranoia checks
-    assert len(identities) == len(set(identities.keys())), 'User names in args.dictionary are not unique'
-    assert len(identities) == len(set(identities.values())), 'Pseudonames in args.dictionary are not unique'
+    if len(identities) != len(set(identities.keys())):   raise Exception('User names in args.dictionary are not unique')
+    if len(identities) != len(set(identities.values())): raise Exception('Pseudonames in args.dictionary are not unique')
 else:
   identities = {}
 
@@ -175,7 +174,7 @@ def pseudonymize(row):
     prefix = user_name[:5]
     pseudonym = user_name[5:]
   else:
-    pseudonym = len(identities) + 1
+    pseudonym = len(identities) + 1 #TODO: A one-way hash or an entirely random number would be better than consecutive numbering
     identities[uid] = f'{prefix}{pseudonym}'
     user_name = identities[uid]
 
@@ -208,7 +207,7 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
           d[lk] = lc_dict(d[lk])
       return d
 
-    normalized_json = lc_dict(row[json_column])
+    normalized_json = lc_dict(row[json_column]) #The original JSON as a dict, but with the keys lower-cased
     for path in json_fields:
       d = normalized_json
       for k in [x.lower() for x in path.split('.')]:
@@ -235,7 +234,7 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
           raise Exception(errstring())
 
   df[json_column] = df[json_column].apply(json_parser)
-  jn = pd.json_normalize(df[json_column])#, meta = json_fields)[json_fields]
+  jn = pd.json_normalize(df[json_column].tolist())#, meta = json_fields)[json_fields]
 
   #Handle the JSON having been treated as case-insensitive
   for json_field in json_fields:
@@ -272,7 +271,7 @@ def read_workflow(workflow):
   print(workflow, WORKFLOW_NAMES[workflow])
   csv_file = f'{args.exports}/{WORKFLOW_NAMES[workflow]}-classifications.csv'
   df = pd.read_csv(csv_file)
-  if not df.workflow_id.unique().size == 1:
+  if not len(df.workflow_id.unique()) == 1:
     raise Exception(f'Too many workflow ids in {csv_file}')
   if df.workflow_id.iloc[0] != workflow:
     raise Exception(f'Expected workflow id {workflow} in CSV file {csv_file}. Got {df.workflow_id.iloc[0]}.')
