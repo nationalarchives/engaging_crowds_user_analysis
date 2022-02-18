@@ -10,9 +10,9 @@ import pandas as pd
 import os
 import shutil
 
-def get_project(x):
-    for k, v in d.PROJECTS.items():
-        if x in v: return k
+def get_project(wid):
+    for proj_name, wids in d.PROJECTS.items():
+        if wid in wids: return proj_name
 
 def load():
   df = pd.read_csv('all_classifications.csv', parse_dates = d.dates, dtype = d.dtypes)
@@ -26,15 +26,15 @@ def prepare(class_df):
   class_df['project'] = class_df.workflow_id.apply(get_project)
   if class_df.project.isna().any(): raise Exception(class_df[class_df.project.isna()])
 
-  class_df['workflow_type'] = class_df.workflow_id.apply(lambda x: d.workflow_map[x]).astype('category')
+  class_df['workflow_type'] = class_df.workflow_id.apply(lambda x: d.workflow_map[x])
 
   class_df['duration'] = class_df['md.finished_at'].subtract(class_df['md.started_at'])
 
-  #TODO Confirmt that Timedelta is the right thing to do here
   utc_offset = class_df['md.utc_offset'].apply(lambda x: pd.Timedelta(x, unit = 's'))
   class_df['local.started_at'] = class_df['md.started_at'] + utc_offset
   class_df['local.finished_at'] = class_df['md.finished_at'] + utc_offset
 
+  #At this stage, we have just added columns to the original dataframe. No data has been lost.
   pre_discards = class_df.copy()
 
   #Data to discard

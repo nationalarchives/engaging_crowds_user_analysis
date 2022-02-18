@@ -75,7 +75,7 @@ workflow_map = {
   18611: 'col-num',
   18612: 'col-date',
   18613: 'col-noun',
-  18614: 'col-dropdown', #TODO -- confirm that this was a dropdown -- but even if not, the strings are quite constrained
+  18614: 'col-dropdown',
   18616: 'col-num',
   18617: 'col-place',
   18618: 'col-place',
@@ -83,7 +83,7 @@ workflow_map = {
   18621: 'col-noun',
   18622: 'col-noun',
   18623: 'col-date',
-  18624: 'col-dropdown', #TODO -- confirm that this was a dropdown -- but even if not, the strings are quite constrained
+  18624: 'col-dropdown',
   18625: 'col-num',
   19381: 'trans-noun', #Reading place names off a label
   19385: 'trans-num'   #Reading numbers (lat/long) off a label
