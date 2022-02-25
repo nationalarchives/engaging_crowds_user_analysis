@@ -53,11 +53,6 @@ def start_times(start_df, subsets):
   #Now do the drawing
 
   def drawit(label, data, filepath, filename, **kwargs):
-    #If I understand correctly, it doesn't matter what 'z' is here, as I am just counting the cells where day and hour intersect
-    #As a result, I am displaying the bar chart of classifications per day at the top (marginal_x) and the bar chart of
-    #classifications per period on the right (marginal_y).
-    #I've checked this with the default Workflows and Period, and the values seem to be correct, so I probably do
-    #understand correctly.
     volunteer_classification_counts = data.pseudonym.value_counts()
     n_v = len(volunteer_classification_counts)
     n_class = len(data)
@@ -115,7 +110,7 @@ def start_times(start_df, subsets):
       high_pseudonyms = volunteer_classification_counts[volunteer_classification_counts.gt(q3)].index.values
       title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
       title += f'<br>Volunteers <= 3rd quartile classifications ({len(low_pseudonyms)} volunteers doing up to {int(q3)} classifications)'
-      fig = px.density_heatmap(data[data.pseudonym.isin(low_pseudonyms)], x = 'day', y = 'period', z = 'project',
+      fig = px.density_heatmap(data[data.pseudonym.isin(low_pseudonyms)], x = 'day', y = 'period',
                                histnorm = 'percent', histfunc = 'count',
                                marginal_x = 'histogram', marginal_y = 'histogram',
                                title = title,
@@ -127,7 +122,7 @@ def start_times(start_df, subsets):
 
       title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
       title += f'<br>Volunteers > 3rd quartile classifications ({len(high_pseudonyms)} volunteers doing over {int(q3)} classifications ({volunteer_classification_counts.loc[high_pseudonyms].min()} to {volunteer_classification_counts.loc[high_pseudonyms].max()} classifications))'
-      fig = px.density_heatmap(data[data.pseudonym.isin(high_pseudonyms)], x = 'day', y = 'period', z = 'project',
+      fig = px.density_heatmap(data[data.pseudonym.isin(high_pseudonyms)], x = 'day', y = 'period',
                                histnorm = 'percent', histfunc = 'count',
                                marginal_x = 'histogram', marginal_y = 'histogram',
                                title = title,
@@ -145,7 +140,7 @@ def start_times(start_df, subsets):
         med_v = volunteer_classification_counts.median()
         title += f'<br>{n_class} classifications ({n_v} volunteers, {n_class} classifications, median = {med_v}, mean = {mean_v:.2f} (\u03C3 = {std_v:.2f}))'
 
-    fig = px.density_heatmap(data, x = 'day', y = 'period', z = 'project',
+    fig = px.density_heatmap(data, x = 'day', y = 'period',
                               histnorm = 'percent', histfunc = 'count',
                               marginal_x = 'histogram', marginal_y = 'histogram',
                               title = title,
