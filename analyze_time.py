@@ -11,6 +11,7 @@ import os
 from multiprocessing import Process
 
 def start_times(start_df, subsets):
+  SINGLE = False
 
   print('Computing all times started (local time)')
 
@@ -175,21 +176,31 @@ def start_times(start_df, subsets):
     #By project
     for project, wids in d.PROJECTS.items():
       print(f'  ... for project {project!r}')
-      p = Process(target = drawit, args = (f'{title}<br>All workflows in project <b>{project!r}</b>', df[df.workflow_id.isin(wids)], proj_path, u.fnam_norm(project)), kwargs = {'box': box})
-      p.start()
-      procs.append(p)
+      if SINGLE:
+        drawit                              (f'{title}<br>All workflows in project <b>{project!r}</b>', df[df.workflow_id.isin(wids)], proj_path, u.fnam_norm(project),             box = box)
+      else:
+        p = Process(target = drawit, args = (f'{title}<br>All workflows in project <b>{project!r}</b>', df[df.workflow_id.isin(wids)], proj_path, u.fnam_norm(project)), kwargs = {'box': box})
+        p.start()
+        procs.append(p)
 
     #By workflow
     for workflow, wid in list(zip(d.WORKFLOWS, d.WORKFLOWS.index)):
       print(f'  ... for workflow {workflow!r}')
-      p = Process(target = drawit, args = (f'{title}<br>Workflow <b>{workflow}</b>', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow)), kwargs = {'box': box})
-      p.start()
-      procs.append(p)
+      if SINGLE:
+        drawit                              (f'{title}<br>Workflow <b>{workflow}</b>', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow),             box = box)
+      else:
+        p = Process(target = drawit, args = (f'{title}<br>Workflow <b>{workflow}</b>', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow)), kwargs = {'box': box})
+        p.start()
+        procs.append(p)
     
     #By workflow type
     for w_type, wids in d.WORKFLOW_TYPES_BACKMAP.items():
       print(f'  ... for workflow type {w_type!r}')
-      p = Process(target = drawit, args = (f'{title}<br>All workflows of type <b>{w_type}</b>', df[df.workflow_id.isin(wids)], type_path, u.fnam_norm(w_type)), kwargs = {'box': box})
-      p.start()
-      procs.append(p)
-  for p in procs: p.join()
+      if SINGLE:
+        drawit                              (f'{title}<br>All workflows of type <b>{w_type}</b>', df[df.workflow_id.isin(wids)], type_path, u.fnam_norm(w_type),             box = box)
+      else:
+        p = Process(target = drawit, args = (f'{title}<br>All workflows of type <b>{w_type}</b>', df[df.workflow_id.isin(wids)], type_path, u.fnam_norm(w_type)), kwargs = {'box': box})
+        p.start()
+        procs.append(p)
+  if SINGLE:
+    for p in procs: p.join()
