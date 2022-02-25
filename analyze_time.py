@@ -62,7 +62,7 @@ def start_times(start_df, subsets):
     n_class = len(data)
 
     if kwargs.get('box'):
-      logfile = open(filepath + '/' + filename + '.txt', 'x')
+      logfile = open(filepath + '/' + filename + '_desc.txt', 'x')
       title = f'{label} ({n_v} volunteers)   [{u.git_condition()}]'
       print(title, file = logfile)
       description = volunteer_classification_counts.describe([0.25, 0.75, 0.9, 0.95, 0.99])
@@ -99,6 +99,7 @@ def start_times(start_df, subsets):
       title += '<br>' + description
 
       #Show the spread of volunteer classification counts
+      volunteer_classification_counts.to_csv(filepath + '/' + filename + '_box.csv', 'x')
       fig = px.box(volunteer_classification_counts, #x = 'workflow_name', y = session_df.duration.apply(lambda x: x.ceil('T').total_seconds()/60),
                    points = 'suspectedoutliers', notched = True,
                    title = title, labels = { 'y': 'Classifications', 'x': ''}, log_y = True)
@@ -121,6 +122,8 @@ def start_times(start_df, subsets):
       fig.write_image(filepath + '/static/' + filename + '_q3.svg', width = 1600, height = 1200)
       fig.write_image(filepath + '/static/' + filename + '_q3.png', width = 1600, height = 1200)
       fig.write_html(filepath + '/dynamic/' + filename + '_q3.html')
+      data[data.pseudonym.isin(low_pseudonyms)].to_csv(filepath + '/' + filename + '_q3.csv')
+
       title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
       title += f'<br>Volunteers > 3rd quartile classifications ({len(high_pseudonyms)} volunteers doing over {int(q3)} classifications ({volunteer_classification_counts.loc[high_pseudonyms].min()} to {volunteer_classification_counts.loc[high_pseudonyms].max()} classifications))'
       fig = px.density_heatmap(data[data.pseudonym.isin(high_pseudonyms)], x = 'day', y = 'period', z = 'project',
@@ -131,6 +134,7 @@ def start_times(start_df, subsets):
       fig.write_image(filepath + '/static/' + filename + '_q4.svg', width = 1600, height = 1200)
       fig.write_image(filepath + '/static/' + filename + '_q4.png', width = 1600, height = 1200)
       fig.write_html(filepath + '/dynamic/' + filename + '_q4.html')
+      data[data.pseudonym.isin(high_pseudonyms)].to_csv(filepath + '/' + filename + '_q4.csv')
 
     #Compute the heatmaps of when classifications happened
     title = f'{label} per weekday and period, in local time ({n_v} volunteers)  [{u.git_condition()}]'
@@ -139,6 +143,7 @@ def start_times(start_df, subsets):
         std_v = volunteer_classification_counts.std()
         med_v = volunteer_classification_counts.median()
         title += f'<br>{n_class} classifications ({n_v} volunteers, {n_class} classifications, median = {med_v}, mean = {mean_v:.2f} (\u03C3 = {std_v:.2f}))'
+
     fig = px.density_heatmap(data, x = 'day', y = 'period', z = 'project',
                               histnorm = 'percent', histfunc = 'count',
                               marginal_x = 'histogram', marginal_y = 'histogram',
