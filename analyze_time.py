@@ -20,7 +20,8 @@ def start_times(start_df, subsets):
     if x.hour >=  8 and x.hour < 12: return 2
     if x.hour >= 12 and x.hour < 16: return 3
     if x.hour >= 16 and x.hour < 20: return 4
-    return 5
+    if x.hour >= 20 and x.hour < 24: return 5
+    assert False
 
     #Alternative periods -- uneven, harder to think about
     if x.hour >= 0 and x.hour < 6:  return 0 #very early morning
@@ -86,6 +87,7 @@ def start_times(start_df, subsets):
         lt = len(volunteer_classification_counts[volunteer_classification_counts.lt(v)])
         eq = len(volunteer_classification_counts[volunteer_classification_counts.eq(v)])
         gt = len(volunteer_classification_counts[volunteer_classification_counts.gt(v)])
+        assert lt + eq + gt == n_v
         p_lt = lt / n_v
         p_eq = eq / n_v
         p_gt = gt / n_v
