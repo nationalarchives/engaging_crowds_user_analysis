@@ -31,8 +31,8 @@ def prepare(class_df):
   class_df['duration'] = class_df['md.finished_at'].subtract(class_df['md.started_at'])
 
   utc_offset = class_df['md.utc_offset'].apply(lambda x: pd.Timedelta(x, unit = 's'))
-  class_df['local.started_at'] = class_df['md.started_at'] + utc_offset
-  class_df['local.finished_at'] = class_df['md.finished_at'] + utc_offset
+  class_df['local.started_at'] = class_df['md.started_at'] - utc_offset
+  class_df['local.finished_at'] = class_df['md.finished_at'] - utc_offset
 
   #At this stage, we have just added columns to the original dataframe. No data has been lost.
   pre_discards = class_df.copy()
