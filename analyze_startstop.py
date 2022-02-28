@@ -46,6 +46,8 @@ def drawit(label, df, filepath, filename):
   return active
 
 def start_stop_dates(df, subsets):
+  SINGLE = True
+
   print('Computing first and last classification dates')
 
   proj_path = u.path_norm(f'secrets/graphs/{d.HEAD}/class_times/project/first_last_day/')
@@ -60,9 +62,12 @@ def start_stop_dates(df, subsets):
   #By project
   for project, wids in d.PROJECTS.items():
     print(f'  ... for project {project!r}')
-    p = Process(target = drawit, args = (f'All workflows in project <b>{project!r}   {[u.git_condition()]}</b><br>UTC dates', df[df.workflow_id.isin(wids)], proj_path, u.fnam_norm(project)))
-    p.start()
-    procs.append(p)
+    if SINGLE:
+      drawit                              (f'All workflows in project <b>{project!r}   {[u.git_condition()]}</b><br>UTC dates', df[df.workflow_id.isin(wids)], proj_path, u.fnam_norm(project))
+    else:
+      p = Process(target = drawit, args = (f'All workflows in project <b>{project!r}   {[u.git_condition()]}</b><br>UTC dates', df[df.workflow_id.isin(wids)], proj_path, u.fnam_norm(project)))
+      p.start()
+      procs.append(p)
 
   #By workflow
   actives = {}
@@ -100,7 +105,11 @@ def start_stop_dates(df, subsets):
   #By workflow type
   for w_type, wids in d.WORKFLOW_TYPES_BACKMAP.items():
     print(f'  ... for workflow type {w_type!r}')
-    p = Process(target = drawit, args = (f'All workflows of type <b>{w_type}</b>   [{u.git_condition()}]<br>UTC dates', df[df.workflow_id.isin(wids)], type_path, u.fnam_norm(w_type)))
-    p.start()
-    procs.append(p)
-  for p in procs: p.join()
+    if SINGLE:
+      drawit                              (f'All workflows of type <b>{w_type}</b>   [{u.git_condition()}]<br>UTC dates', df[df.workflow_id.isin(wids)], type_path, u.fnam_norm(w_type))
+    else:
+      p = Process(target = drawit, args = (f'All workflows of type <b>{w_type}</b>   [{u.git_condition()}]<br>UTC dates', df[df.workflow_id.isin(wids)], type_path, u.fnam_norm(w_type)))
+      p.start()
+      procs.append(p)
+  if not SINGLE:
+    for p in procs: p.join()
