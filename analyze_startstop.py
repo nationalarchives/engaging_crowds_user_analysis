@@ -79,7 +79,7 @@ def start_stop_dates(df, subsets):
   for project, wids in d.PROJECTS.items():
     import plotly.graph_objects as go
     fig = go.Figure()
-    fig.update_layout(title = f'Active volunteers on {project}')
+    fig.update_layout(title = f'Active volunteers on {project} {[u.git_condition()]}')
     for wid in wids:
       fig.add_trace(go.Scatter(x = actives[wid].index, y = actives[wid].values, name = d.WORKFLOWS[wid]))
     fig.write_image(proj_path + '/static/' + u.fnam_norm(project) + '_agg_gain.png', width = 1600, height = 1200)
@@ -95,7 +95,7 @@ def start_stop_dates(df, subsets):
 
   for w_type, t_wids in special_workflow_map.items():
     fig = go.Figure()
-    fig.update_layout(title = f'Active volunteers on HMS NHS ({w_type})')
+    fig.update_layout(title = f'Active volunteers on HMS NHS ({w_type}) {[u.git_condition()]}')
     for t_wid in t_wids:
       fig.add_trace(go.Scatter(x = actives[t_wid].index, y = actives[t_wid].values, name = d.WORKFLOWS[t_wid]))
     fig.write_image(type_path + '/static/' + u.fnam_norm(w_type) + '_agg_gain.png', width = 1600, height = 1200)
