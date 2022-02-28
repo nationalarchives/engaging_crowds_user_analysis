@@ -15,11 +15,13 @@ def drawit(label, df, filepath, filename):
   fig.write_image(filepath + '/static/' + filename + '_firstday.svg', width = 1600, height = 1200)
   fig.write_image(filepath + '/static/' + filename + '_firstday.png', width = 1600, height = 1200)
   fig.write_html(filepath + '/dynamic/' + filename + '_firstday.html')
+  first_time.to_csv(filepath + '/' + filename + '_first_time.csv', mode = 'x')
 
   fig = px.bar(last_time, title = f'{label}<br>Number of volunteers making final classification on date')
   fig.write_image(filepath + '/static/' + filename + '_lastday.svg', width = 1600, height = 1200)
   fig.write_image(filepath + '/static/' + filename + '_lastday.png', width = 1600, height = 1200)
   fig.write_html(filepath + '/dynamic/' + filename + '_lastday.html')
+  last_time.to_csv(filepath + '/' + filename + '_last_time.csv', mode = 'x')
 
   #Compute total volunteers on any given data
   active = first_time.append(last_time.rsub(0)).sort_index() #This will give duplicate dates, with the volunteers lost on the date appearing as a negative number after the volunteers gained on the date
@@ -38,6 +40,8 @@ def drawit(label, df, filepath, filename):
   fig.write_image(filepath + '/static/' + filename + '_gain.svg', width = 1600, height = 1200)
   fig.write_image(filepath + '/static/' + filename + '_gain.png', width = 1600, height = 1200)
   fig.write_html(filepath + '/dynamic/' + filename + '_gain.html')
+  active.to_csv(filepath + '/' + filename + '_active.csv', mode = 'x')
+  gain.to_csv  (filepath + '/' + filename + '_gain.csv', mode = 'x')
 
   return active
 
@@ -75,6 +79,7 @@ def start_stop_dates(df, subsets):
       fig.add_trace(go.Scatter(x = actives[wid].index, y = actives[wid].values, name = d.WORKFLOWS[wid]))
     fig.write_image(proj_path + '/static/' + u.fnam_norm(project) + '_agg_gain.png', width = 1600, height = 1200)
     fig.write_html(proj_path + '/dynamic/' + u.fnam_norm(project) + '_agg_gain.html')
+    pd.Series().append([actives[x] for x in wids]).to_csv(proj_path + '/' + u.fnam_norm(project) + '_agg_gain.csv', mode = 'x')
 
   special_workflow_map = {
     'Numbers': [18611, 18616, 18619, 18625],
@@ -90,6 +95,7 @@ def start_stop_dates(df, subsets):
       fig.add_trace(go.Scatter(x = actives[t_wid].index, y = actives[t_wid].values, name = d.WORKFLOWS[t_wid]))
     fig.write_image(type_path + '/static/' + u.fnam_norm(w_type) + '_agg_gain.png', width = 1600, height = 1200)
     fig.write_html(type_path + '/dynamic/' + u.fnam_norm(w_type) + '_agg_gain.html')
+    pd.Series().append([actives[x] for x in t_wids]).to_csv(type_path + '/' + u.fnam_norm(w_type) + '_agg_gain.csv', mode = 'x')
 
   #By workflow type
   for w_type, wids in d.WORKFLOW_TYPES_BACKMAP.items():
