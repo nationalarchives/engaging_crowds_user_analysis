@@ -317,7 +317,7 @@ def main():
     v[['user_name', 'user_id', 'user_ip']] = v[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns', result_type = 'expand')
 
   #Pseudonymize using the previously-generated pseuondyms, and then drop the useless field
-  df['pseudonym'] = df[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns', result_type = 'expand')[0]
+  df['pseudonym'] = df[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns', result_type = 'expand').iloc[:,0]
   df = df.drop(['user_name', 'user_id', 'user_ip'], axis = 'columns')
 
   #Drop fields that we do not need at all
