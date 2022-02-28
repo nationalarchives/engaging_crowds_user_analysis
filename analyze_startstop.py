@@ -25,7 +25,8 @@ def drawit(label, df, filepath, filename):
 
   #Compute total volunteers on any given data
   active = first_time.append(last_time.rsub(0)).sort_index() #This will give duplicate dates, with the volunteers lost on the date appearing as a negative number after the volunteers gained on the date
-  active = active.cumsum() #The final entry for a given date will now be the total volunteers on that date
+  #There are likely to be some dates with only one entry -- these are dates on which we have only gained or lost volunteers.
+  active = active.cumsum() #The final entry for a given date will now be the total volunteers on that date -- this includes the case where there is only 1 entry for a given date
   dup_mask = active.index.duplicated(keep = 'last') #Identify the duplicates -- last occurence will be marked False, others True (re https://www.kite.com/python/answers/how-to-remove-rows-in-a-pandas-dataframe-with-duplicate-indices-in-python)
   dup_mask = ~dup_mask #Invert the mask so that last entries are True, others False
   active = active[dup_mask]
