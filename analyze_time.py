@@ -95,7 +95,7 @@ def start_times(start_df, subsets):
       title += '<br>' + description
 
       #Show the spread of volunteer classification counts
-      volunteer_classification_counts.to_csv(filepath + '/' + filename + '_box.csv', 'x')
+      volunteer_classification_counts.to_csv(filepath + '/' + filename + '_box.csv', mode = 'x')
       fig = px.box(volunteer_classification_counts, #x = 'workflow_name', y = session_df.duration.apply(lambda x: x.ceil('T').total_seconds()/60),
                    points = 'suspectedoutliers', notched = True,
                    title = title, labels = { 'y': 'Classifications', 'x': ''}, log_y = True)
@@ -118,7 +118,7 @@ def start_times(start_df, subsets):
       fig.write_image(filepath + '/static/' + filename + '_q3.svg', width = 1600, height = 1200)
       fig.write_image(filepath + '/static/' + filename + '_q3.png', width = 1600, height = 1200)
       fig.write_html(filepath + '/dynamic/' + filename + '_q3.html')
-      data[data.pseudonym.isin(low_pseudonyms)].to_csv(filepath + '/' + filename + '_q3.csv')
+      data[data.pseudonym.isin(low_pseudonyms)].to_csv(filepath + '/' + filename + '_q3.csv', mode = 'x')
 
       title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
       title += f'<br>Volunteers > 3rd quartile classifications ({len(high_pseudonyms)} volunteers doing over {int(q3)} classifications ({volunteer_classification_counts.loc[high_pseudonyms].min()} to {volunteer_classification_counts.loc[high_pseudonyms].max()} classifications))'
@@ -130,7 +130,7 @@ def start_times(start_df, subsets):
       fig.write_image(filepath + '/static/' + filename + '_q4.svg', width = 1600, height = 1200)
       fig.write_image(filepath + '/static/' + filename + '_q4.png', width = 1600, height = 1200)
       fig.write_html(filepath + '/dynamic/' + filename + '_q4.html')
-      data[data.pseudonym.isin(high_pseudonyms)].to_csv(filepath + '/' + filename + '_q4.csv')
+      data[data.pseudonym.isin(high_pseudonyms)].to_csv(filepath + '/' + filename + '_q4.csv', mode = 'x')
 
     #Compute the heatmaps of when classifications happened
     title = f'{label} per weekday and period, in local time ({n_v} volunteers)  [{u.git_condition()}]'
@@ -151,7 +151,7 @@ def start_times(start_df, subsets):
     fig.write_html(filepath + '/dynamic/' + filename + '.html')
 
     #Record the data used to make these graphs
-    data.to_csv(filepath + '/' + filename + '.csv')
+    data.to_csv(filepath + '/' + filename + '.csv', mode = 'x')
 
   procs = []
   for label, df, box in ('all classifiers', start_df, True), \
