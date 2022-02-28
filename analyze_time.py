@@ -197,5 +197,5 @@ def start_times(start_df, subsets):
         p = Process(target = drawit, args = (f'{title}<br>All workflows of type <b>{w_type}</b>', df[df.workflow_id.isin(wids)], type_path, u.fnam_norm(w_type)), kwargs = {'box': box})
         p.start()
         procs.append(p)
-  if SINGLE:
+  if not SINGLE:
     for p in procs: p.join()
