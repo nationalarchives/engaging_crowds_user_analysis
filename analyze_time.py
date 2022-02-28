@@ -106,8 +106,8 @@ def start_times(start_df, subsets):
 
       #Dump the heatmaps as cut by q3
       #TODO All lot of this should very much be factored out to some subroutine
-      low_pseudonyms  = volunteer_classification_counts[volunteer_classification_counts.le(q3)].index.values
-      high_pseudonyms = volunteer_classification_counts[volunteer_classification_counts.gt(q3)].index.values
+      low_pseudonyms  = volunteer_classification_counts[volunteer_classification_counts.le(q3)].index.copy().values
+      high_pseudonyms = volunteer_classification_counts[volunteer_classification_counts.gt(q3)].index.copy().values
       title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
       title += f'<br>Volunteers <= 3rd quartile classifications ({len(low_pseudonyms)} volunteers doing up to {int(q3)} classifications)'
       fig = px.density_heatmap(data[data.pseudonym.isin(low_pseudonyms)], x = 'day', y = 'period',
