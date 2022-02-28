@@ -38,15 +38,15 @@ def prepare(class_df):
   pre_discards = class_df.copy()
 
   #Data to discard
-  negative_df = class_df[class_df.duration.apply(lambda x: x.total_seconds()) < 0]
+  negative_df = class_df[class_df.duration.apply(lambda x: x.total_seconds()) < 0].copy()
   class_df = class_df.drop(negative_df.index)
 
-  anon_df = class_df[class_df.pseudonym.apply(lambda x: x[0] == 'a')]
+  anon_df = class_df[class_df.pseudonym.apply(lambda x: x[0] == 'a')].copy()
   class_df = class_df.drop(anon_df.index)
 
   #Useful subsets of the kept data
   p_counts = class_df.pseudonym.value_counts()
-  mono_class_index = class_df[class_df.pseudonym.isin(p_counts.index[p_counts == 1])].index
+  mono_class_index = class_df[class_df.pseudonym.isin(p_counts.index[p_counts == 1])].index.copy()
   plural_class_index = class_df.index.drop(mono_class_index)
 
   return (
@@ -55,9 +55,9 @@ def prepare(class_df):
       'mono': mono_class_index,
       'plural': plural_class_index,
     },
+    pre_discards,
     ('Negative duration', negative_df, d.TIME_COLS, 'Uninterpretable'),
-    ('Anonymous', anon_df, ['pseudonym'], 'May not be an individual; hashes can change, resulting in inconsistent identification across workflows/projects'),
-    pre_discards
+    ('Anonymous', anon_df, ['pseudonym'], 'May not be an individual; hashes can change, resulting in inconsistent identification across workflows/projects')
   )
 
 if __name__ == '__main__':
@@ -72,7 +72,7 @@ if __name__ == '__main__':
   print('Loading data')
   original_df = load()
   print('Preparing data')
-  class_df, subsets, *deletions, undeleted_df = prepare(original_df.copy())
+  class_df, subsets, undeleted_df, *deletions = prepare(original_df.copy())
 
   full_size = len(class_df)
   original_full_size = len(original_df)
