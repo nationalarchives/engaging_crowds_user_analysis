@@ -276,7 +276,7 @@ def read_workflow(workflow):
   if df.workflow_id.iloc[0] != workflow:
     raise Exception(f'Expected workflow id {workflow} in CSV file {csv_file}. Got {df.workflow_id.iloc[0]}.')
 
-  minimal_pseudonyms[workflow] = df #Store the original classification
+  minimal_pseudonyms[workflow] = df.copy() #Store the original classification
 
   df = df[df['workflow_version'].isin(WORKFLOW_KEEPERS[workflow])]
   df = df.reset_index(drop = True) #Reset the index so that we line up with the JSON expansion
