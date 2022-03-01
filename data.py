@@ -79,7 +79,7 @@ workflow_map = {
   18616: 'col-num',
   18617: 'col-noun',
   18618: 'col-noun',
-  18619: 'col-num-complex',
+  18619: 'col-num',
   18621: 'col-noun',
   18622: 'col-noun',
   18623: 'col-date',
