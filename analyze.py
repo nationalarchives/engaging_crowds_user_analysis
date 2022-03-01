@@ -16,6 +16,10 @@ def get_project(wid):
 
 def load():
   df = pd.read_csv('all_classifications.csv', parse_dates = d.dates, dtype = d.dtypes)
+  for date in d.dates:
+    if date == 'subj.date': continue
+    df[date] = df[date].dt.tz_convert(None)
+  #At this point, all date/time columns are datetime64[ns, UTC], except for subj.data, which is datetime64[ns]
   if len(df) != len(df.index.unique()): raise Exception("Index is not unique")
   if len(df.classification_id) != len(df.classification_id.unique()): raise Exception("Classification ids are not unique")
   #Uniques are returned in order of appearance, so this should maintain the correct id:name pairing
@@ -30,7 +34,7 @@ def prepare(class_df):
 
   class_df['duration'] = class_df['md.finished_at'].subtract(class_df['md.started_at'])
 
-  utc_offset = class_df['md.utc_offset'].apply(lambda x: pd.Timedelta(x, unit = 's'))
+  utc_offset = class_df['md.utc_offset'].apply(lambda x: pd.Timedelta(x, unit = 'seconds'))
   class_df['local.started_at'] = class_df['md.started_at'] - utc_offset
   class_df['local.finished_at'] = class_df['md.finished_at'] - utc_offset
 
