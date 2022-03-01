@@ -11,7 +11,7 @@ import os
 from multiprocessing import Process
 
 def start_times(start_df, subsets):
-  SINGLE = False
+  SINGLE = True
 
   print('Computing all times started (local time)')
 
