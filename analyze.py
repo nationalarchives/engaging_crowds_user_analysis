@@ -20,10 +20,12 @@ def get_project(wid):
         if wid in wids: return proj_name
 
 def load():
-  df = pd.read_csv('all_classifications.csv', parse_dates = d.dates, dtype = d.dtypes)
-  for date in d.dates:
-    if date == 'subj.date': continue
-    df[date] = df[date].dt.tz_convert(None)
+  inferring = False #Very much faster -- helpful during development, but I don't trust it for producing real data
+  df = pd.read_csv('all_classifications.csv', parse_dates = d.dates, infer_datetime_format = inferring, dtype = d.dtypes)
+  if not inferring: #inferring reads the dates naively
+    for date in d.dates:
+      if date == 'subj.date': continue
+      df[date] = df[date].dt.tz_convert(None)
   #At this point, all date/time columns are datetime64[ns, UTC], except for subj.data, which is datetime64[ns]
   if len(df) != len(df.index.unique()): raise Exception("Index is not unique")
   if len(df.classification_id) != len(df.classification_id.unique()): raise Exception("Classification ids are not unique")
