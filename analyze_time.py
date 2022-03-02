@@ -10,6 +10,27 @@ import plotly.express as px
 import os
 from multiprocessing import Process
 
+def durations(durations_df, subsets):
+  durations_df.duration = durations_df.duration.dt.total_seconds().div(60)
+  filepath = f'secrets/graphs/{d.HEAD}/class_times/workflow/duration_stats'
+  for x in 'static', 'dynamic': os.makedirs(filepath + '/' + x)
+  fig = px.box(durations_df, x = 'workflow_name', y = 'duration',
+               points = 'suspectedoutliers', notched = True,
+               labels = { 'workflow_name': 'Workflow Name', 'duration': 'Minutes'})
+  fig.update_traces(quartilemethod = 'linear')
+  fig.write_image(filepath + '/static/all_times_box.svg', width = 1600, height = 1200)
+  fig.write_image(filepath + '/static/all_times_box.png', width = 1600, height = 1200)
+  fig.write_html(filepath + '/dynamic/all_times_box.html')
+  durations_df.to_csv(filepath + '/all_times_box.csv', mode = 'x')
+  print('\nStatistical overview of workflow durations')
+  print('=' * len('Statistical overview of workflow durations'))
+  for project, wids in d.PROJECTS.items():
+    print('\n' + project); print('-' * len(project))
+    print(pd.DataFrame(
+      { d.LABELS[wid]: durations_df[durations_df.workflow_id == wid]['duration'] for wid in wids }
+    ).describe())
+
+
 def start_times(start_df, subsets):
   SINGLE = True
 
