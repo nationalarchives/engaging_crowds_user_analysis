@@ -27,9 +27,12 @@ class Logger(object):
   def write(self, message):
     self.terminal.write(message)
     self.log.write(message)
-  def flush(self): pass
+  def flush(self):
+    self.terminal.flush()
+    self.log.flush()
   def close(self):
     self.log.close()
+    self.terminal.flush()
     sys.stdout = self.terminal
   def __del__(self):
     self.close()
