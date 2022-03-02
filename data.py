@@ -62,6 +62,26 @@ PROJECTS = {
         19385, #"Latitude/Longitude",
     ]
 }
+LABELS = {
+      1: 'Attendance',
+  18504: 'Minutes',
+  18505: 'People',
+  18611: '01. Admission Number',
+  18612: '02. Date of Entry',
+  18613: '03. Name',
+  18614: '04. Quality',
+  18616: '05. Age',
+  18617: '06. Place of Birth',
+  18618: '07. Port Sailed Out Of',
+  18619: '08. Years At Sea',
+  18621: '09. Last Services',
+  18622: '10. Nature of Complaint',
+  18623: '11. Date of Discharge',
+  18624: '12. How Disposed Of',
+  18625: '13. Days Victualled',
+  19381: 'Geography',
+  19385: 'Latitude/Longitude',
+}
 
 class_cap = {
     SB: pd.Timedelta(150, 'm'),

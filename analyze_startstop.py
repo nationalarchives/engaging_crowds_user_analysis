@@ -82,7 +82,7 @@ def start_stop_dates(df, subsets):
     fig = go.Figure(layout = { 'colorway': px.colors.qualitative.Light24 }) #re https://plotly.com/python/discrete-color/
     fig.update_layout(title = f'Active volunteers on {project} {[u.git_condition()]}')
     for wid in wids:
-      fig.add_trace(go.Scatter(x = actives[wid].index, y = actives[wid].values, name = d.WORKFLOWS[wid]))
+      fig.add_trace(go.Scatter(x = actives[wid].index, y = actives[wid].values, name = d.LABELS[wid]))
     fig.write_image(proj_path + '/static/' + u.fnam_norm(project) + '_agg_gain.png', width = 1600, height = 1200)
     fig.write_html(proj_path + '/dynamic/' + u.fnam_norm(project) + '_agg_gain.html')
     pd.Series().append([actives[x] for x in wids]).to_csv(proj_path + '/' + u.fnam_norm(project) + '_agg_gain.csv', mode = 'x')
@@ -98,7 +98,7 @@ def start_stop_dates(df, subsets):
     fig = go.Figure(layout = { 'colorway': px.colors.qualitative.Light24 }) #re https://plotly.com/python/discrete-color/
     fig.update_layout(title = f'Active volunteers on HMS NHS ({w_type}) {[u.git_condition()]}')
     for t_wid in t_wids:
-      fig.add_trace(go.Scatter(x = actives[t_wid].index, y = actives[t_wid].values, name = d.WORKFLOWS[t_wid]))
+      fig.add_trace(go.Scatter(x = actives[t_wid].index, y = actives[t_wid].values, name = d.LABELS[t_wid]))
     fig.write_image(type_path + '/static/' + u.fnam_norm(w_type) + '_agg_gain.png', width = 1600, height = 1200)
     fig.write_html(type_path + '/dynamic/' + u.fnam_norm(w_type) + '_agg_gain.html')
     pd.Series().append([actives[x] for x in t_wids]).to_csv(type_path + '/' + u.fnam_norm(w_type) + '_agg_gain.csv', mode = 'x')
