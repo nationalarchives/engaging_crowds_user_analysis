@@ -10,6 +10,11 @@ import pandas as pd
 import os
 import shutil
 
+#Always dump everything in a dataframe -- if I'm dumping it then I want the whole thing
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+pd.set_option('display.expand_frame_repr', None)
+
 def get_project(wid):
     for proj_name, wids in d.PROJECTS.items():
         if wid in wids: return proj_name
