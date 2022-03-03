@@ -58,6 +58,12 @@ def prepare(class_df):
 
   #Useful subsets of the kept data
   p_counts = class_df.pseudonym.value_counts()
+
+  #FIXME: This is a useless way of dividing up the data. It is separating the people who classified
+  #       exactly once (one workflow on one project) from everyone else. That is a different thing
+  #       from the people who classified only once on a project or only once on a workflow.
+  #       This also means that the mono and multi graphs in the outputs are not actually telling
+  #       us anything useful.
   mono_class_index = class_df[class_df.pseudonym.isin(p_counts.index[p_counts == 1])].index.copy()
   plural_class_index = class_df.index.drop(mono_class_index)
 
