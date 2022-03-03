@@ -127,6 +127,7 @@ def start_times(start_df, subsets):
 
       #Dump the heatmaps as cut by q3
       #TODO All lot of this should very much be factored out to some subroutine
+      q1_pseudonyms   = volunteer_classification_counts[volunteer_classification_counts.le(q1)].index.copy().values
       low_pseudonyms  = volunteer_classification_counts[volunteer_classification_counts.le(q3)].index.copy().values
       high_pseudonyms = volunteer_classification_counts[volunteer_classification_counts.gt(q3)].index.copy().values
       title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
@@ -152,6 +153,18 @@ def start_times(start_df, subsets):
       fig.write_image(filepath + '/static/' + filename + '_q4.png', width = 1600, height = 1200)
       fig.write_html(filepath + '/dynamic/' + filename + '_q4.html')
       data[data.pseudonym.isin(high_pseudonyms)].to_csv(filepath + '/' + filename + '_q4.csv', mode = 'x')
+
+      title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
+      title += f'<br>Volunteers <= 1st quartile classifications ({len(q1_pseudonyms)} volunteers doing up to {int(q1)} classifications) ({len(data[data.pseudonym.isin(q1_pseudonyms)])} total classifications)'
+      fig = px.density_heatmap(data[data.pseudonym.isin(q1_pseudonyms)], x = 'day', y = 'period',
+                               histnorm = 'percent', histfunc = 'count',
+                               marginal_x = 'histogram', marginal_y = 'histogram',
+                               title = title,
+                               category_orders = {'day': DAYS, 'period': PERIODS})
+      fig.write_image(filepath + '/static/' + filename + '_q1.svg', width = 1600, height = 1200)
+      fig.write_image(filepath + '/static/' + filename + '_q1.png', width = 1600, height = 1200)
+      fig.write_html(filepath + '/dynamic/' + filename + '_q1.html')
+      data[data.pseudonym.isin(q1_pseudonyms)].to_csv(filepath + '/' + filename + '_q1.csv', mode = 'x')
 
     #Compute the heatmaps of when classifications happened
     title = f'{label} per weekday and period, in local time ({n_v} volunteers)  [{u.git_condition()}]'
