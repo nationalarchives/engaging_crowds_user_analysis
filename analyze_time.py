@@ -166,6 +166,20 @@ def start_times(start_df, subsets):
       fig.write_html(filepath + '/dynamic/' + filename + '_q1.html')
       data[data.pseudonym.isin(q1_pseudonyms)].to_csv(filepath + '/' + filename + '_q1.csv', mode = 'x')
 
+      for iteration in range(1, 5):
+        random_pseudonyms = data.sample(frac = 0.25)
+        title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
+        title += f'<br>Random 25% of all {n_class} classifications)'
+        fig = px.density_heatmap(random_pseudonyms, x = 'day', y = 'period',
+                                 histnorm = 'percent', histfunc = 'count',
+                                 marginal_x = 'histogram', marginal_y = 'histogram',
+                                 title = title,
+                                 category_orders = {'day': DAYS, 'period': PERIODS})
+        fig.write_image(filepath + '/static/' + filename + f'_r{iteration}.svg', width = 1600, height = 1200)
+        fig.write_image(filepath + '/static/' + filename + f'_r{iteration}.png', width = 1600, height = 1200)
+        fig.write_html(filepath + '/dynamic/' + filename + f'_r{iteration}.html')
+        random_pseudonyms.to_csv(filepath + '/' + filename + f'_r{iteration}.csv', mode = 'x')
+
     #Compute the heatmaps of when classifications happened
     title = f'{label} per weekday and period, in local time ({n_v} volunteers)  [{u.git_condition()}]'
     if n_v != n_class:
