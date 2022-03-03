@@ -91,6 +91,7 @@ if __name__ == '__main__':
   original_df = load()
   print('Preparing data')
   class_df, subsets, undeleted_df, *deletions = prepare(original_df.copy())
+  class_df.to_csv(f'secrets/graphs/{d.HEAD}/prepared_classifications.csv')
 
   full_size = len(class_df)
   original_full_size = len(original_df)
