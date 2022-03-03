@@ -130,7 +130,7 @@ def start_times(start_df, subsets):
       low_pseudonyms  = volunteer_classification_counts[volunteer_classification_counts.le(q3)].index.copy().values
       high_pseudonyms = volunteer_classification_counts[volunteer_classification_counts.gt(q3)].index.copy().values
       title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
-      title += f'<br>Volunteers <= 3rd quartile classifications ({len(low_pseudonyms)} volunteers doing up to {int(q3)} classifications)'
+      title += f'<br>Volunteers <= 3rd quartile classifications ({len(low_pseudonyms)} volunteers doing up to {int(q3)} classifications) ({len(data[data.pseudonym.isin(low_pseudonyms)])} total classifications)'
       fig = px.density_heatmap(data[data.pseudonym.isin(low_pseudonyms)], x = 'day', y = 'period',
                                histnorm = 'percent', histfunc = 'count',
                                marginal_x = 'histogram', marginal_y = 'histogram',
@@ -142,7 +142,7 @@ def start_times(start_df, subsets):
       data[data.pseudonym.isin(low_pseudonyms)].to_csv(filepath + '/' + filename + '_q3.csv', mode = 'x')
 
       title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
-      title += f'<br>Volunteers > 3rd quartile classifications ({len(high_pseudonyms)} volunteers doing over {int(q3)} classifications ({volunteer_classification_counts.loc[high_pseudonyms].min()} to {volunteer_classification_counts.loc[high_pseudonyms].max()} classifications))'
+      title += f'<br>Volunteers > 3rd quartile classifications ({len(high_pseudonyms)} volunteers doing over {int(q3)} classifications ({volunteer_classification_counts.loc[high_pseudonyms].min()} to {volunteer_classification_counts.loc[high_pseudonyms].max()} classifications)) ({len(data[data.pseudonym.isin(high_pseudonyms)])} total classifications)'
       fig = px.density_heatmap(data[data.pseudonym.isin(high_pseudonyms)], x = 'day', y = 'period',
                                histnorm = 'percent', histfunc = 'count',
                                marginal_x = 'histogram', marginal_y = 'histogram',
