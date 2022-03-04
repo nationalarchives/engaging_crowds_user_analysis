@@ -19,4 +19,5 @@ google-chrome --new-window \
   secrets/graphs/`git rev-parse HEAD`/class_times/workflow/all_classifiers/dynamic/attendance${1}.html \
   secrets/graphs/`git rev-parse HEAD`/class_times/workflow/all_classifiers/dynamic/Meetings${1}.html \
   secrets/graphs/`git rev-parse HEAD`/class_times/workflow/all_classifiers/dynamic/Latitude_Longitude${1}.html \
-  secrets/graphs/`git rev-parse HEAD`/class_times/workflow/all_classifiers/dynamic/Geography${1}.html
+  secrets/graphs/`git rev-parse HEAD`/class_times/workflow/all_classifiers/dynamic/Geography${1}.html \
+  &
