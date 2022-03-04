@@ -83,6 +83,11 @@ def start_times(start_df, subsets):
     fig.write_html(filepath + '/dynamic/' + filename + identifier + '.html')
     heat_data.to_csv(filepath + '/' + filename + identifier + '.csv', mode = 'x')
 
+  def random_heatmap(title, full_data, filepath, filename, identifier, iterations, fraction):
+      for iteration in range(1, iterations):
+        title = f'{title}<br>Random {fraction:%} of all {len(full_data)} classifications)'
+        draw_heatmap(title, full_data.sample(frac = fraction), filepath, filename, f'{identifier}{iteration}')
+
   def drawit(label, data, filepath, filename, **kwargs):
     volunteer_classification_counts = data.pseudonym.value_counts()
     n_v = len(volunteer_classification_counts)
@@ -161,19 +166,7 @@ def start_times(start_df, subsets):
       title = f'{base_title}<br>Volunteers <= 1st quartile classifications ({v_count} volunteers doing up to {int(q1)} classifications) ({c_count} total classifications)'
       draw_heatmap(title, heatmap_data, filepath, filename, '_q1')
 
-      for iteration in range(1, 5):
-        random_pseudonyms = data.sample(frac = 0.25)
-        title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
-        title += f'<br>Random 25% of all {n_class} classifications)'
-        fig = px.density_heatmap(random_pseudonyms, x = 'day', y = 'period',
-                                 histnorm = 'percent', histfunc = 'count',
-                                 marginal_x = 'histogram', marginal_y = 'histogram',
-                                 title = title,
-                                 category_orders = {'day': DAYS, 'period': PERIODS})
-        fig.write_image(filepath + '/static/' + filename + f'_r{iteration}.svg', width = 1600, height = 1200)
-        fig.write_image(filepath + '/static/' + filename + f'_r{iteration}.png', width = 1600, height = 1200)
-        fig.write_html(filepath + '/dynamic/' + filename + f'_r{iteration}.html')
-        random_pseudonyms.to_csv(filepath + '/' + filename + f'_r{iteration}.csv', mode = 'x')
+      random_heatmap(base_title, data, filepath, filename, '_r', 5, 0.25)
 
     #Compute the heatmaps of when classifications happened
     title = f'{label} per weekday and period, in local time ({n_v} volunteers)  [{u.git_condition()}]'
