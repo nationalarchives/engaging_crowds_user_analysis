@@ -226,11 +226,11 @@ def start_times(start_df, subsets):
 
     #By workflow
     for workflow, wid in list(zip(d.WORKFLOWS, d.WORKFLOWS.index)):
-      print(f'  ... for workflow {workflow!r}')
+      print(f'  ... for workflow {workflow!r} ({d.LABELS[wid]})')
       if SINGLE:
-        drawit                              (f'{title}<br>Workflow <b>{workflow}</b>', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow),             box = box)
+        drawit                              (f'{title}<br>Workflow <b>{d.LABELS[wid]}</b>', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow),             box = box)
       else:
-        p = Process(target = drawit, args = (f'{title}<br>Workflow <b>{workflow}</b>', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow)), kwargs = {'box': box})
+        p = Process(target = drawit, args = (f'{title}<br>Workflow <b>{d.LABELS[wid]}</b>', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow)), kwargs = {'box': box})
         p.start()
         procs.append(p)
     

@@ -73,9 +73,9 @@ def start_stop_dates(df, subsets):
   #By workflow
   actives = {}
   for workflow, wid in list(zip(d.WORKFLOWS, d.WORKFLOWS.index)):
-    print(f'  ... for workflow {workflow!r}')
+    print(f'  ... for workflow {workflow!r} ({d.LABELS[wid]})')
     if wid in actives: raise Exception()
-    actives[wid] = drawit(f'Workflow <b>{workflow}</b>   [{u.git_condition()}]<br>UTC dates', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow))
+    actives[wid] = drawit(f'Workflow <b>{d.LABELS[wid]}</b>   [{u.git_condition()}]<br>UTC dates', df[df.workflow_id == wid], flow_path, u.fnam_norm(workflow))
 
   for project, wids in d.PROJECTS.items():
     import plotly.graph_objects as go
