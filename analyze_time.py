@@ -72,6 +72,16 @@ def start_times(start_df, subsets):
   print(start_df.sample(5))
 
   #Now do the drawing
+  def draw_heatmap(title, heat_data, filepath, filename, identifier):
+    fig = px.density_heatmap(heat_data, x = 'day', y = 'period',
+                             histnorm = 'percent', histfunc = 'count',
+                             marginal_x = 'histogram', marginal_y = 'histogram',
+                             title = title,
+                             category_orders = {'day': DAYS, 'period': PERIODS})
+    fig.write_image(filepath + '/static/' + filename + identifier + '.svg', width = 1600, height = 1200)
+    fig.write_image(filepath + '/static/' + filename + identifier + '.png', width = 1600, height = 1200)
+    fig.write_html(filepath + '/dynamic/' + filename + identifier + '.html')
+    heat_data.to_csv(filepath + '/' + filename + identifier + '.csv', mode = 'x')
 
   def drawit(label, data, filepath, filename, **kwargs):
     volunteer_classification_counts = data.pseudonym.value_counts()
@@ -125,46 +135,22 @@ def start_times(start_df, subsets):
       fig.write_image(filepath + '/static/' + filename + '_box.png', width = 1600, height = 1200)
       fig.write_html(filepath + '/dynamic/' + filename + '_box.html')
 
-      #Dump the heatmaps as cut by q3
-      #TODO All lot of this should very much be factored out to some subroutine
-      q1_pseudonyms   = volunteer_classification_counts[volunteer_classification_counts.le(q1)].index.copy().values
+      base_title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
+
+      #<= q3 of classification counts
       low_pseudonyms  = volunteer_classification_counts[volunteer_classification_counts.le(q3)].index.copy().values
+      title = f'{base_title}<br>Volunteers <= 3rd quartile classifications ({len(low_pseudonyms)} volunteers doing up to {int(q3)} classifications) ({len(data[data.pseudonym.isin(low_pseudonyms)])} total classifications)'
+      draw_heatmap(title, data[data.pseudonym.isin(low_pseudonyms)], filepath, filename, '_q3')
+
+      #> q3 of classification counts
       high_pseudonyms = volunteer_classification_counts[volunteer_classification_counts.gt(q3)].index.copy().values
-      title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
-      title += f'<br>Volunteers <= 3rd quartile classifications ({len(low_pseudonyms)} volunteers doing up to {int(q3)} classifications) ({len(data[data.pseudonym.isin(low_pseudonyms)])} total classifications)'
-      fig = px.density_heatmap(data[data.pseudonym.isin(low_pseudonyms)], x = 'day', y = 'period',
-                               histnorm = 'percent', histfunc = 'count',
-                               marginal_x = 'histogram', marginal_y = 'histogram',
-                               title = title,
-                               category_orders = {'day': DAYS, 'period': PERIODS})
-      fig.write_image(filepath + '/static/' + filename + '_q3.svg', width = 1600, height = 1200)
-      fig.write_image(filepath + '/static/' + filename + '_q3.png', width = 1600, height = 1200)
-      fig.write_html(filepath + '/dynamic/' + filename + '_q3.html')
-      data[data.pseudonym.isin(low_pseudonyms)].to_csv(filepath + '/' + filename + '_q3.csv', mode = 'x')
+      title = f'{base_title}<br>Volunteers > 3rd quartile classifications ({len(high_pseudonyms)} volunteers doing over {int(q3)} classifications ({volunteer_classification_counts.loc[high_pseudonyms].min()} to {volunteer_classification_counts.loc[high_pseudonyms].max()} classifications)) ({len(data[data.pseudonym.isin(high_pseudonyms)])} total classifications)'
+      draw_heatmap(title, data[data.pseudonym.isin(high_pseudonyms)], filepath, filename, '_q4')
 
-      title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
-      title += f'<br>Volunteers > 3rd quartile classifications ({len(high_pseudonyms)} volunteers doing over {int(q3)} classifications ({volunteer_classification_counts.loc[high_pseudonyms].min()} to {volunteer_classification_counts.loc[high_pseudonyms].max()} classifications)) ({len(data[data.pseudonym.isin(high_pseudonyms)])} total classifications)'
-      fig = px.density_heatmap(data[data.pseudonym.isin(high_pseudonyms)], x = 'day', y = 'period',
-                               histnorm = 'percent', histfunc = 'count',
-                               marginal_x = 'histogram', marginal_y = 'histogram',
-                               title = title,
-                               category_orders = {'day': DAYS, 'period': PERIODS})
-      fig.write_image(filepath + '/static/' + filename + '_q4.svg', width = 1600, height = 1200)
-      fig.write_image(filepath + '/static/' + filename + '_q4.png', width = 1600, height = 1200)
-      fig.write_html(filepath + '/dynamic/' + filename + '_q4.html')
-      data[data.pseudonym.isin(high_pseudonyms)].to_csv(filepath + '/' + filename + '_q4.csv', mode = 'x')
-
-      title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
-      title += f'<br>Volunteers <= 1st quartile classifications ({len(q1_pseudonyms)} volunteers doing up to {int(q1)} classifications) ({len(data[data.pseudonym.isin(q1_pseudonyms)])} total classifications)'
-      fig = px.density_heatmap(data[data.pseudonym.isin(q1_pseudonyms)], x = 'day', y = 'period',
-                               histnorm = 'percent', histfunc = 'count',
-                               marginal_x = 'histogram', marginal_y = 'histogram',
-                               title = title,
-                               category_orders = {'day': DAYS, 'period': PERIODS})
-      fig.write_image(filepath + '/static/' + filename + '_q1.svg', width = 1600, height = 1200)
-      fig.write_image(filepath + '/static/' + filename + '_q1.png', width = 1600, height = 1200)
-      fig.write_html(filepath + '/dynamic/' + filename + '_q1.html')
-      data[data.pseudonym.isin(q1_pseudonyms)].to_csv(filepath + '/' + filename + '_q1.csv', mode = 'x')
+      #<= q1 of classification counts
+      q1_pseudonyms   = volunteer_classification_counts[volunteer_classification_counts.le(q1)].index.copy().values
+      title = f'{base_title}<br>Volunteers <= 1st quartile classifications ({len(q1_pseudonyms)} volunteers doing up to {int(q1)} classifications) ({len(data[data.pseudonym.isin(q1_pseudonyms)])} total classifications)'
+      draw_heatmap(title, data[data.pseudonym.isin(q1_pseudonyms)], filepath, filename, '_q1')
 
       for iteration in range(1, 5):
         random_pseudonyms = data.sample(frac = 0.25)
@@ -187,19 +173,7 @@ def start_times(start_df, subsets):
         std_v = volunteer_classification_counts.std()
         med_v = volunteer_classification_counts.median()
         title += f'<br>{n_class} classifications ({n_v} volunteers, {n_class} classifications, median = {med_v}, mean = {mean_v:.2f} (\u03C3 = {std_v:.2f}))'
-
-    fig = px.density_heatmap(data, x = 'day', y = 'period',
-                              histnorm = 'percent', histfunc = 'count',
-                              marginal_x = 'histogram', marginal_y = 'histogram',
-                              title = title,
-                              category_orders = {'day': DAYS, 'period': PERIODS})
-    #pio.show(fig, renderer = 'browser')
-    fig.write_image(filepath + '/static/' + filename + '.svg', width = 1600, height = 1200)
-    fig.write_image(filepath + '/static/' + filename + '.png', width = 1600, height = 1200)
-    fig.write_html(filepath + '/dynamic/' + filename + '.html')
-
-    #Record the data used to make these graphs
-    data.to_csv(filepath + '/' + filename + '.csv', mode = 'x')
+    draw_heatmap(title, data, filepath, filename, '')
 
   procs = []
   for label, df, box in [('all classifiers', start_df, True)]:
