@@ -139,18 +139,27 @@ def start_times(start_df, subsets):
 
       #<= q3 of classification counts
       low_pseudonyms  = volunteer_classification_counts[volunteer_classification_counts.le(q3)].index.copy().values
-      title = f'{base_title}<br>Volunteers <= 3rd quartile classifications ({len(low_pseudonyms)} volunteers doing up to {int(q3)} classifications) ({len(data[data.pseudonym.isin(low_pseudonyms)])} total classifications)'
-      draw_heatmap(title, data[data.pseudonym.isin(low_pseudonyms)], filepath, filename, '_q3')
+      heatmap_data = data[data.pseudonym.isin(low_pseudonyms)]
+      v_count = len(low_pseudonyms)
+      c_count = len(heatmap_data)
+      title = f'{base_title}<br>Volunteers <= 3rd quartile classifications ({v_count} volunteers doing up to {int(q3)} classifications) ({c_count} total classifications)'
+      draw_heatmap(title, heatmap_data, filepath, filename, '_q3')
 
       #> q3 of classification counts
       high_pseudonyms = volunteer_classification_counts[volunteer_classification_counts.gt(q3)].index.copy().values
-      title = f'{base_title}<br>Volunteers > 3rd quartile classifications ({len(high_pseudonyms)} volunteers doing over {int(q3)} classifications ({volunteer_classification_counts.loc[high_pseudonyms].min()} to {volunteer_classification_counts.loc[high_pseudonyms].max()} classifications)) ({len(data[data.pseudonym.isin(high_pseudonyms)])} total classifications)'
-      draw_heatmap(title, data[data.pseudonym.isin(high_pseudonyms)], filepath, filename, '_q4')
+      heatmap_data = data[data.pseudonym.isin(high_pseudonyms)]
+      v_count = len(high_pseudonyms)
+      c_count = len(heatmap_data)
+      title = f'{base_title}<br>Volunteers > 3rd quartile classifications ({v_count} volunteers doing over {int(q3)} classifications ({volunteer_classification_counts.loc[high_pseudonyms].min()} to {volunteer_classification_counts.loc[high_pseudonyms].max()} classifications)) ({c_count} total classifications)'
+      draw_heatmap(title, heatmap_data, filepath, filename, '_q4')
 
       #<= q1 of classification counts
       q1_pseudonyms   = volunteer_classification_counts[volunteer_classification_counts.le(q1)].index.copy().values
-      title = f'{base_title}<br>Volunteers <= 1st quartile classifications ({len(q1_pseudonyms)} volunteers doing up to {int(q1)} classifications) ({len(data[data.pseudonym.isin(q1_pseudonyms)])} total classifications)'
-      draw_heatmap(title, data[data.pseudonym.isin(q1_pseudonyms)], filepath, filename, '_q1')
+      heatmap_data = data[data.pseudonym.isin(q1_pseudonyms)]
+      v_count = len(q1_pseudonyms)
+      c_count = len(heatmap_data)
+      title = f'{base_title}<br>Volunteers <= 1st quartile classifications ({v_count} volunteers doing up to {int(q1)} classifications) ({c_count} total classifications)'
+      draw_heatmap(title, heatmap_data, filepath, filename, '_q1')
 
       for iteration in range(1, 5):
         random_pseudonyms = data.sample(frac = 0.25)
