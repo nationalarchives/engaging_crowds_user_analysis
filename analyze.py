@@ -2,6 +2,7 @@
 
 import data as d
 import util as u
+from analyze_class import classifications
 from contributors import contributors
 from analyze_time import start_times, durations
 from analyze_startstop import start_stop_dates
@@ -130,6 +131,7 @@ if __name__ == '__main__':
     print(f'{k + ":":10}{c:7,} classifications ({c / full_size:06.2%} of {full_size} undiscarded classifications.)')
   print('\n\n')
 
+  classifications(class_df.copy(), subsets)
   contributors(class_df.copy(), subsets)
   durations(class_df.copy(), subsets)
   start_times(class_df.copy(), subsets)
