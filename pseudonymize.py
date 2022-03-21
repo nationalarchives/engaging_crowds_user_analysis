@@ -336,7 +336,7 @@ def main():
   df.to_csv('all_classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
 
   with open(args.dictionary, 'w') as f:
-    f.write(json.dumps(identities))
+    json.dump(identities, f, indent = 2, sort_keys = True)
 
   #This should be updated for STOPSTAMP, but I'm anyway not using it at the moment.
   for k, v in minimal_pseudonyms.items():
