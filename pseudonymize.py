@@ -348,6 +348,9 @@ def main():
 
   df.to_csv('all_classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
 
+  #paranoia checks
+  if len(identities) != len(set(identities.keys())):   raise Exception('User names in args.dictionary are not unique')
+  if len(identities) != len(set(identities.values())): raise Exception('Pseudonames in args.dictionary are not unique')
   with open(args.dictionary, 'w') as f:
     json.dump(identities, f, indent = 2, sort_keys = True)
 
