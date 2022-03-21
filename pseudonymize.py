@@ -7,6 +7,8 @@ import argparse
 import json
 import os
 import sys
+import secrets
+import string
 from collections import Counter
 
 #For debugging
@@ -157,6 +159,17 @@ else:
   identities = {}
 
 def pseudonymize(row):
+  def random_name():
+    failcount = 0
+    while failcount < 10:
+      #TODO: 6 digits provides enough unique strings for Engaging Crowds. Should really be calculated.
+      rnd = ''.join(secrets.choice(string.digits) for i in range(6))
+      if f'{prefix}{rnd}' in identities.values():
+        failcount += 1
+      else:
+        return rnd
+    raise Exception('10 failures to generate a unique pseudonym. Try increasing the number of characters in the pseudonyms.')
+
   uid = row['user_id']
   if np.isnan(uid):
     #Anonymous user -- use the ip addr as the uid, so that all
@@ -174,7 +187,7 @@ def pseudonymize(row):
     prefix = user_name[:5]
     pseudonym = user_name[5:]
   else:
-    pseudonym = len(identities) + 1 #TODO: A one-way hash or an entirely random number would be better than consecutive numbering
+    pseudonym = random_name()
     identities[uid] = f'{prefix}{pseudonym}'
     user_name = identities[uid]
 
