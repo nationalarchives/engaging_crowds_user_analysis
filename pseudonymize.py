@@ -343,7 +343,7 @@ def main():
 
   #Output data for the data sharing platform
   for project, wids in d.PROJECTS.items():
-    df[df.workflow_id.isin(wids)].drop('START', axis = 'columns').to_csv(f'{u.fnam_norm(project)}.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
+    df[df.workflow_id.isin(wids)].drop('START', axis = 'columns').dropna(axis='columns', how = 'all').to_csv(f'{u.fnam_norm(project)}.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
 
   #Output data for analysis
   #Much the same as the data sharing platform output, but everything goes into a single file and classifications outside of the relevant date range are dropped
