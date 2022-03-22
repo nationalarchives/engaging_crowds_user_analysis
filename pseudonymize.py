@@ -9,6 +9,8 @@ import os
 import sys
 import secrets
 import string
+import data as d
+import util as u
 from collections import Counter
 
 #For debugging
@@ -339,6 +341,12 @@ def main():
   #Expand out the interesting bits of the metadata, drop the rest
   df = expand_json(df, 'metadata', METADATA_KEEPERS, 'md')
 
+  #Output data for the data sharing platform
+  for project, wids in d.PROJECTS.items():
+    df[df.workflow_id.isin(wids)].drop('START', axis = 'columns').to_csv(f'{u.fnam_norm(project)}.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
+
+  #Output data for analysis
+  #Much the same as the data sharing platform output, but everything goes into a single file and classifications outside of the relevant date range are dropped
   df['md.started_at'] = df['md.started_at'].astype(np.datetime64)
   df = df[df['md.started_at'] >= df['START']]
   df = df.drop('START', axis = 'columns')
