@@ -315,11 +315,6 @@ def read_workflow(workflow):
     return subj_info[next(iter(subj_info))] 
   df = expand_json(df, 'subject_data', ALL_SUBJECT_KEEPERS + WORKFLOW_SUBJECT_KEEPERS[workflow], 'subj', parse_subj_info)
 
-  #Special handling for attendance vs minutes pages in S&B meetings workflow
-  if workflow == 18504:
-    attendance_subjects = df.sort_values('subj.page')[['subj.date', 'subject_ids']].groupby(['subj.date']).first().subject_ids
-    df.loc[df.subject_ids.isin(attendance_subjects), ('workflow_id', 'workflow_name')] = (1, 'attendance')
-
   return df
 
 def main():
@@ -347,6 +342,12 @@ def main():
 
   #Output data for analysis
   #Much the same as the data sharing platform output, but everything goes into a single file and classifications outside of the relevant date range are dropped
+  #And we make a fake workflow of the attendance branch of the meetings workflow
+  #Important to do this *before* we drop any rows! Otherwise the first page within a date group is not necessarily an attendance page.
+  #FIXME: Read in the subjects file and use that to identify the attendance pages -- this won't break if we happen to start dropping rows earlier then here.
+  attendance_subjects = df[df.workflow_id == 18504].sort_values('subj.page')[['subj.date', 'subject_ids']].groupby(['subj.date']).first().subject_ids
+  df.loc[df.subject_ids.isin(attendance_subjects), ('workflow_id', 'workflow_name')] = (1, 'attendance')
+
   df['md.started_at'] = df['md.started_at'].astype(np.datetime64)
   df = df[df['md.started_at'] >= df['START']]
   df = df.drop('START', axis = 'columns')
