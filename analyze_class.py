@@ -45,7 +45,7 @@ def drawit(label, df, filepath, filename):
   fig = px.bar(cpv, title = f'{label}<br>% of total classifications by each {bin_size} volunteers, from most to least prolific<br>({len(df)} total classifications by {v_c} total volunteers)', range_y = [0, 100])
   fig.write_image(filepath + '/static/' + filename + '_class_vol.svg', width = 1600, height = 1200)
   fig.write_image(filepath + '/static/' + filename + '_class_vol.png', width = 1600, height = 1200)
-  fig.write_html(filepath + '/dynamic/' + filename + '_class_vol.html')
+  fig.write_html(filepath + '/dynamic/' + filename + '_class_vol.html', include_plotlyjs = 'directory')
   cpv.to_csv  (filepath + '/' + filename + '_class_vol.csv', mode = 'x')
 
 

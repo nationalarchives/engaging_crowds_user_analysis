@@ -20,7 +20,7 @@ def durations(durations_df, subsets):
   fig.update_traces(quartilemethod = 'linear')
   fig.write_image(filepath + '/static/all_times_box.svg', width = 1600, height = 1200)
   fig.write_image(filepath + '/static/all_times_box.png', width = 1600, height = 1200)
-  fig.write_html(filepath + '/dynamic/all_times_box.html')
+  fig.write_html(filepath + '/dynamic/all_times_box.html', include_plotlyjs = 'directory')
   durations_df.to_csv(filepath + '/all_times_box.csv', mode = 'x')
   print('\nStatistical overview of workflow durations')
   print('=' * len('Statistical overview of workflow durations'))
@@ -80,7 +80,7 @@ def start_times(start_df, subsets):
                              category_orders = {'day': DAYS, 'period': PERIODS})
     fig.write_image(filepath + '/static/' + filename + identifier + '.svg', width = 1600, height = 1200)
     fig.write_image(filepath + '/static/' + filename + identifier + '.png', width = 1600, height = 1200)
-    fig.write_html(filepath + '/dynamic/' + filename + identifier + '.html')
+    fig.write_html(filepath + '/dynamic/' + filename + identifier + '.html', include_plotlyjs = 'directory')
     heat_data.to_csv(filepath + '/' + filename + identifier + '.csv', mode = 'x')
 
   def random_heatmap(title, full_data, filepath, filename, identifier, iterations, fraction):
@@ -138,7 +138,7 @@ def start_times(start_df, subsets):
       fig.update_traces(quartilemethod = 'linear')
       fig.write_image(filepath + '/static/' + filename + '_box.svg', width = 1600, height = 1200)
       fig.write_image(filepath + '/static/' + filename + '_box.png', width = 1600, height = 1200)
-      fig.write_html(filepath + '/dynamic/' + filename + '_box.html')
+      fig.write_html(filepath + '/dynamic/' + filename + '_box.html', include_plotlyjs = 'directory')
 
       base_title = f'{label} per weekday and period, in local time  [{u.git_condition()}]'
 
