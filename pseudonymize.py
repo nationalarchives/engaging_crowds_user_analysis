@@ -322,6 +322,7 @@ def main():
   #https://stackoverflow.com/a/21232849
   df = pd.concat([read_workflow(x) for x in args.workflows], ignore_index = True)
 
+  print('Pseudonymising')
   #Pseudonymise the individual files, building pseudonyms for everyone who has ever classified as a side effect
   for v in minimal_pseudonyms.values():
     v[['user_name', 'user_id', 'user_ip']] = v[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns', result_type = 'expand')
@@ -333,10 +334,12 @@ def main():
   #Drop fields that we do not need at all
   df = df.drop(['gold_standard', 'expert', 'annotations'], axis = 'columns')
 
+  print('Expanding  metadata')
   #Expand out the interesting bits of the metadata, drop the rest
   df = expand_json(df, 'metadata', METADATA_KEEPERS, 'md')
 
   #Output data for the data sharing platform
+  print('Generating per-project outputs for data sharing platform')
   for project, wids in d.PROJECTS.items():
     df[df.workflow_id.isin(wids)].drop('START', axis = 'columns').dropna(axis='columns', how = 'all').to_csv(f'{u.fnam_norm(project)}.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
 
@@ -345,6 +348,7 @@ def main():
   #And we make a fake workflow of the attendance branch of the meetings workflow
   #Important to do this *before* we drop any rows! Otherwise the first page within a date group is not necessarily an attendance page.
   #FIXME: Read in the subjects file and use that to identify the attendance pages -- this won't break if we happen to start dropping rows earlier then here.
+  print('Generating all_classifications.csv for analysis')
   attendance_subjects = df[df.workflow_id == 18504].sort_values('subj.page')[['subj.date', 'subject_ids']].groupby(['subj.date']).first().subject_ids
   df.loc[df.subject_ids.isin(attendance_subjects), ('workflow_id', 'workflow_name')] = (1, 'attendance')
 
