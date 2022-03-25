@@ -283,6 +283,25 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
   df = df.drop(json_column, axis = 'columns')
   return df
 
+def read_subj_loc(project):
+  def parse_subj_loc(cell):
+    loc = json.loads(cell)
+
+    #Make sure that the data is shaped as we expect
+    if len(loc) != 1:
+      if len(loc > 1):
+        raise Exception(f'Encountered subject info for multiple subject ids: {subj_info.keys()}')
+      else: #0-length dictionary
+        raise Exception('Missing subject info')
+    if not '0' in loc:
+      raise Exception('Location missing key "0" -- should be its only key')
+    return loc['0']
+
+  subj_locs = pd.read_csv(f'exports/{d.SUBJECTS[project]}', index_col = 'subject_id').locations.apply(parse_subj_loc).rename('location')
+  if not subj_locs.groupby('subject_id').nunique().eq(1).all():
+    raise Exception('At least one subject id has multiple locations')
+  return subj_locs.drop_duplicates()
+
 #Read workflow's CSV file into a dataframe and do workflow-specific transformations
 def read_workflow(workflow):
   print(workflow, WORKFLOW_NAMES[workflow])
@@ -362,6 +381,8 @@ However, the reproduction reciple is:
 Pseudonyms are randomly generated so will differ from run to run. They are unique per user-id.
 
 ''')
+
+      proj_df = proj_df.join(read_subj_loc(project), on = 'subject_ids', how = 'left')
       proj_df.to_csv(f'{basedir}/classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
       os.makedirs('sharing', exist_ok = True)
       for ar_format in ('zip', 'xztar'):

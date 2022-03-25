@@ -36,6 +36,11 @@ dates = [
 SB = 'Scarlets & Blues'
 HMS = 'HMS NHS'
 RBGE = 'RBGE Herbarium'
+SUBJECTS = {
+  SB: 'scarlets-and-blues-subjects.csv',
+  HMS: 'hms-nhs-the-nautical-health-service-subjects.csv',
+  RBGE: 'the-rbge-herbarium-exploring-gesneriaceae-the-african-violet-family-subjects.csv',
+}
 PROJECTS = {
     SB: [
         1,     #Attendance pseudo-workflow
