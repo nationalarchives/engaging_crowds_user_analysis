@@ -336,7 +336,7 @@ def main():
   #Drop fields that we do not need at all
   df = df.drop(['gold_standard', 'expert', 'annotations'], axis = 'columns')
 
-  print('Expanding  metadata')
+  print('Expanding metadata')
   #Expand out the interesting bits of the metadata, drop the rest
   df = expand_json(df, 'metadata', METADATA_KEEPERS, 'md')
 
