@@ -67,8 +67,8 @@ ALL_SUBJECT_KEEPERS = ['#priority', 'retired.retired_at']
 _HMS_NHS_SUBJECT_KEEPERS = ['Filename']
 _RBGE_SUBJECT_KEEPERS = ['Botanist','Group','Format','Species','Barcode']
 WORKFLOW_SUBJECT_KEEPERS = {
-  18504: ['Date', 'Page', 'Catalogue'],
-  18505: ['Surnames starting with'],
+  18504: ['Date', 'Page', 'Catalogue', 'image'],
+  18505: ['Surnames starting with', 'image'],
   18611: _HMS_NHS_SUBJECT_KEEPERS,
   18612: _HMS_NHS_SUBJECT_KEEPERS,
   18613: _HMS_NHS_SUBJECT_KEEPERS,
