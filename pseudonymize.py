@@ -202,6 +202,8 @@ def pseudonymize(row):
   else:
     raise Exception(f'{prefix} {user_name} {pseudonym}')
 
+#df must have a default index -- otherwise it will not align with the output of pd.json_normalize
+#json_fields must be the not-lower-case 'spelling' in cases where there are lower-case and not-lower-case spellings of the same field
 def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
   def check_metadata(row):
     #Check that key in original JSON matches what is in the column -- but case-insensitively
@@ -261,6 +263,12 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
       continue
     if insensitive_count != 2:
       raise Exception(f'{lower_field}: {insensitive_count}') #Only wrote code to handle lowercase + one other version
+
+    #At this point we know that there are two case-variants of the same name. For the rest of this code to work,
+    #we need to know both 'spellings'. For now, just reqire that the passed-in name is the not-lower-case name
+    #TODO: An alternative to aborting in this case would be to just figure out what the non-lowercase variant is
+    if json_field == lower_field:
+      raise Exception(f'json_fields argument {json_field!r} must be the non-lower-case variant')
 
     #Check that the nulls line up consistently with this being the same field with inconsistent case in name
     if jn[[json_field, lower_field]].isnull().sum(axis = 1).ne(1).any():
