@@ -272,7 +272,8 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
 
     #Check that the nulls line up consistently with this being the same field with inconsistent case in name
     if jn[[json_field, lower_field]].isnull().sum(axis = 1).ne(1).any():
-      raise Exception('Apparent multicased JSON field does not align: some rows have values in both or neither spelling of the field.')
+      bad = jn[[json_field, lower_field]].isnull().sum(axis = 1).ne(1)
+      raise Exception(f'Apparent multicased JSON field {json_field} does not align: some rows have values in both or neither spelling of the field.\n' + str(jn[bad][[json_field, lower_field]]))
     print(f'Fixing up apparent use of both {json_field} and {lower_field}', file = sys.stderr)
 
     jn[lower_field] = jn[lower_field].combine_first(jn[json_field])
