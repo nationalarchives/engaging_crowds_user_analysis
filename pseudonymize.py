@@ -306,10 +306,36 @@ def read_subj_loc(project):
       raise Exception('Location missing key "0" -- should be its only key')
     return loc['0']
 
-  subj_locs = pd.read_csv(f'exports/{d.SUBJECTS[project]}', index_col = 'subject_id').locations.apply(parse_subj_loc).rename('location')
+  #Treat this as read-only
+  subj_df = pd.read_csv(f'exports/{d.SUBJECTS[project]}', index_col = 'subject_id')
+
+  subj_locs = subj_df.locations.apply(parse_subj_loc).rename('location.zooniverse')
   if not subj_locs.groupby('subject_id').nunique().eq(1).all():
     raise Exception('At least one subject id has multiple locations')
-  return subj_locs.drop_duplicates()
+
+  #We need to change subj_locs into a dataframe to be able to return a second column. We only need to do this in the case where
+  #there actually is a second column, and it should be fine to have this function return either a dataframe or a series. But let's
+  #keep it simple and always return a dataframe, rather than risk subtle bugs in the future.
+  subj_locs = subj_locs.to_frame()
+  #Tempting to drop duplicates at this stage, but this might result in index mis-alignment if we need to add any extra columns for
+  #a particular project -- as we do for RBGE at time of writing.
+
+  if project == d.RBGE:
+    #We must have a default index when calling in to expand_json, so that the input df and the expanded-JSON-df have common indices.
+    #And then we need to change back to indexing on subject_id so that we can combine the result of this operation with subj_locs.
+    subj_locs_extra = expand_json(subj_df.reset_index(), 'metadata', ['Barcode'], 'subj').set_index('subject_id')
+
+    #Then replace the ref to the dataframe with ref to series of interest, suitably transformed
+    subj_locs_extra = 'https://data.rbge.org.uk/herb/' + subj_locs_extra['subj.barcode'].rename('location.rbge')
+    if not subj_locs_extra.groupby('subject_id').nunique().eq(1).all():
+      raise Exception('At least one subject id has multiple RBGE locations')
+    if not subj_locs.index.equals(subj_locs_extra.index):
+      raise Exception('Index of main dataframe for data sharing platform must have identical index to supplementary column')
+    subj_locs = subj_locs.join(subj_locs_extra, on = 'subject_id', how = 'left')
+
+  #Drop all rules that are duplicates based on the (original) index value, plus all columns
+  #Note that drop_duplicates does not consider index, so we have to shift the index into the columns to ensure that this will work
+  return subj_locs.reset_index().drop_duplicates().set_index('subject_id')
 
 #Read workflow's CSV file into a dataframe and do workflow-specific transformations
 def read_workflow(workflow):
