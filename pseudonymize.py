@@ -217,6 +217,94 @@ location.zooniverse          Location of the classified file on the Zooniverse s
 '''
   return blurb
 
+def make_shareables(copied_df):
+  for project, wids in d.PROJECTS.items():
+    print(f'  {project}')
+    proj_df = copied_df[copied_df.workflow_id.isin(wids)].drop('START', axis = 'columns').dropna(axis='columns', how = 'all')
+
+    #We have to use the subjects file to get the subject set id.
+    #If I understand correctly, this file is NOT synchronized with the
+    #classifications and does not record historical information, but
+    #rather just the membership of the subjects at the time that it was
+    #generated. This means that if a subject has moved from one subject
+    #set to another, or been removed from workflow, it will not appear in
+    #this file.
+    #So we hope that the subject files that we are working with
+    #accurately describe the current subject_set for each subject.
+    #If this does not hold, then we can at least get the 'raw' location of the
+    #subject (location.zooniverse.plain in the below), so long as the subject id
+    #is mentioned somewhere in this file.
+    #If the subject id is not in the file at all then we give up. I suppose
+    #that it might be possible to use a subject set id known to be associated
+    #with a workflow to generate a URL for it -- but if it is not in this file,
+    #it seems unlikely that that URL would be valid.
+    #For some projects we can also point to file locations on the home
+    #institution's site.
+    #(In principle it is more efficient to compute subject locations once,
+    #but we do it per-classification. This is partly because it makes for
+    #simpler code -- thus easier to understand/maintain/reuse. Note also
+    #that the 'location.zooniverse.project' field can legitimately
+    #have different values for the same subject, depending upon which workflow
+    #it was classified in and which subject set it belonged to.)
+    subj_df = pd.read_csv(f'exports/{d.SUBJECTS[project]}',
+                          usecols = ['subject_id', 'workflow_id', 'subject_set_id', 'locations'])
+    subj_sets = subj_df.set_index(['subject_id', 'workflow_id']).subject_set_id
+    subj_locs = subj_df.set_index('subject_id').locations
+    if project == d.RBGE: proj_df['location.rbge'] = 'https://data.rbge.org.uk/herb/' + proj_df['subj.barcode']
+    elif project == d.SB: proj_df['location.tna'] = 'https://discovery.nationalarchives.gov.uk/details/r/C' + \
+                          proj_df['subj.image'].apply(lambda x: str(int(x.split('_')[2]) - 433 + 170195))
+
+    #This function is only needed to get the 'project' location
+    def get_subject_set_id(row):
+      subj_set = None
+      try:
+        subj_set = subj_sets.loc[(row['subject_ids'], row['workflow_id'])]
+      except KeyError:
+        print(f'No subjects file entry for subject {row.subject_ids} with workflow {row.workflow_id}', file = sys.stderr)
+        return f"<MISSING SUBJECT SET ID>"
+      if not isinstance(subj_set, np.int64):
+        #This constraint might not hold for other projects, but I expect it to be true
+        #across the Engaging Crowds family. If it breaks down then the code will need modification
+        #to handle a single subject in multiple subject sets -- whether this is caused by that
+        #currently being the case, or by the file choosing to keep an entry for each subject_id that
+        #a subject set has ever belonged to (if, indeed, it is allowed to do that)
+        raise Exception('Expected single integer value for subject_set_id for subject in workflow')
+      return f"{d.PROJECT_URLS[project]}classify/workflow/{row['workflow_id']}/subject-set/{subj_set}/subject/{row['subject_ids']}"
+    proj_df['location.zooniverse.project'] = proj_df.apply(get_subject_set_id, axis = 1)
+
+    #This function is only needed to get the 'raw' location
+    def parse_subj_loc(sid):
+      loc = subj_locs.loc[sid]
+      if isinstance(loc, pd.Series):
+        loc = loc.unique() #Returns ndarray or ExtensionArray. I'm assuming len and [] work the same either way.
+        if len(loc) == 1: loc = loc[0]
+        else:
+          #We assume that all of the locations show the same image
+          print(f'Using final of multiple locations for subject {sid}', file = sys.stderr)
+          loc = loc[-1]
+      loc = json.loads(loc)
+
+      #Make sure that the data is shaped as we expect
+      if len(loc) != 1:
+        if len(loc > 1): raise Exception(f'Encountered multiple locations for subject_id {sid} in single row')
+        else: raise Exception(f'Missing location for subject_id {sid}')
+      if not '0' in loc:
+        raise Exception('Location missing key "0" for subject_id {sid} -- should be its only key')
+      if len(loc['0'].strip()) == 0:
+        print(f'No subjects file entry for subject_id {sid}', file = sys.stderr)
+        return '<UNLISTED SUBJECT>'
+      else: return loc['0']
+    proj_df['location.zooniverse.plain'] = proj_df.subject_ids.apply(parse_subj_loc)
+
+    with tempfile.TemporaryDirectory('.') as tmpdir:
+      basedir = f'{tmpdir}/{u.fnam_norm(project)}_data'
+      os.mkdir(basedir)
+      with open(f'{basedir}/README.txt', 'w') as f:
+        f.write(f'Generated by {os.path.basename(__file__)} with git status {u.git_condition()}' + '\n' + readme_blurb([project]))
+      proj_df.to_csv(f'{basedir}/classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
+      for ar_format in ('zip', 'xztar'):
+        shutil.make_archive(f'sharing/{u.fnam_norm(project)}', ar_format, tmpdir)
+
 parser = argparse.ArgumentParser()
 parser.add_argument('workflows',
                     nargs = '*',
@@ -436,92 +524,7 @@ def main():
   #Output data for the data sharing platform
   print('Generating per-project outputs for data sharing platform')
   os.makedirs('sharing', exist_ok = True)
-  for project, wids in d.PROJECTS.items():
-    print(f'  {project}')
-    proj_df = df[df.workflow_id.isin(wids)].drop('START', axis = 'columns').dropna(axis='columns', how = 'all')
-
-    #We have to use the subjects file to get the subject set id.
-    #If I understand correctly, this file is NOT synchronized with the
-    #classifications and does not record historical information, but
-    #rather just the membership of the subjects at the time that it was
-    #generated. This means that if a subject has moved from one subject
-    #set to another, or been removed from workflow, it will not appear in
-    #this file.
-    #So we hope that the subject files that we are working with
-    #accurately describe the current subject_set for each subject.
-    #If this does not hold, then we can at least get the 'raw' location of the
-    #subject (location.zooniverse.plain in the below), so long as the subject id
-    #is mentioned somewhere in this file.
-    #If the subject id is not in the file at all then we give up. I suppose
-    #that it might be possible to use a subject set id known to be associated
-    #with a workflow to generate a URL for it -- but if it is not in this file,
-    #it seems unlikely that that URL would be valid.
-    #For some projects we can also point to file locations on the home
-    #institution's site.
-    #(In principle it is more efficient to compute subject locations once,
-    #but we do it per-classification. This is partly because it makes for
-    #simpler code -- thus easier to understand/maintain/reuse. Note also
-    #that the 'location.zooniverse.project' field can legitimately
-    #have different values for the same subject, depending upon which workflow
-    #it was classified in and which subject set it belonged to.)
-    subj_df = pd.read_csv(f'exports/{d.SUBJECTS[project]}',
-                          usecols = ['subject_id', 'workflow_id', 'subject_set_id', 'locations'])
-    subj_sets = subj_df.set_index(['subject_id', 'workflow_id']).subject_set_id
-    subj_locs = subj_df.set_index('subject_id').locations
-    if project == d.RBGE: proj_df['location.rbge'] = 'https://data.rbge.org.uk/herb/' + proj_df['subj.barcode']
-    elif project == d.SB: proj_df['location.tna'] = 'https://discovery.nationalarchives.gov.uk/details/r/C' + \
-                          proj_df['subj.image'].apply(lambda x: str(int(x.split('_')[2]) - 433 + 170195))
-
-    #This function is only needed to get the 'project' location
-    def get_subject_set_id(row):
-      subj_set = None
-      try:
-        subj_set = subj_sets.loc[(row['subject_ids'], row['workflow_id'])]
-      except KeyError:
-        print(f'No subjects file entry for subject {row.subject_ids} with workflow {row.workflow_id}', file = sys.stderr)
-        return f"<MISSING SUBJECT SET ID>"
-      if not isinstance(subj_set, np.int64):
-        #This constraint might not hold for other projects, but I expect it to be true
-        #across the Engaging Crowds family. If it breaks down then the code will need modification
-        #to handle a single subject in multiple subject sets -- whether this is caused by that
-        #currently being the case, or by the file choosing to keep an entry for each subject_id that
-        #a subject set has ever belonged to (if, indeed, it is allowed to do that)
-        raise Exception('Expected single integer value for subject_set_id for subject in workflow')
-      return f"{d.PROJECT_URLS[project]}classify/workflow/{row['workflow_id']}/subject-set/{subj_set}/subject/{row['subject_ids']}"
-    proj_df['location.zooniverse.project'] = proj_df.apply(get_subject_set_id, axis = 1)
-
-    #This function is only needed to get the 'raw' location
-    def parse_subj_loc(sid):
-      loc = subj_locs.loc[sid]
-      if isinstance(loc, pd.Series):
-        loc = loc.unique() #Returns ndarray or ExtensionArray. I'm assuming len and [] work the same either way.
-        if len(loc) == 1: loc = loc[0]
-        else:
-          #We assume that all of the locations show the same image
-          print(f'Using final of multiple locations for subject {sid}', file = sys.stderr)
-          loc = loc[-1]
-      loc = json.loads(loc)
-
-      #Make sure that the data is shaped as we expect
-      if len(loc) != 1:
-        if len(loc > 1): raise Exception(f'Encountered multiple locations for subject_id {sid} in single row')
-        else: raise Exception(f'Missing location for subject_id {sid}')
-      if not '0' in loc:
-        raise Exception('Location missing key "0" for subject_id {sid} -- should be its only key')
-      if len(loc['0'].strip()) == 0:
-        print(f'No subjects file entry for subject_id {sid}', file = sys.stderr)
-        return '<UNLISTED SUBJECT>'
-      else: return loc['0']
-    proj_df['location.zooniverse.plain'] = proj_df.subject_ids.apply(parse_subj_loc)
-
-    with tempfile.TemporaryDirectory('.') as tmpdir:
-      basedir = f'{tmpdir}/{u.fnam_norm(project)}_data'
-      os.mkdir(basedir)
-      with open(f'{basedir}/README.txt', 'w') as f:
-        f.write(f'Generated by {os.path.basename(__file__)} with git status {u.git_condition()}' + '\n' + readme_blurb([project]))
-      proj_df.to_csv(f'{basedir}/classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
-      for ar_format in ('zip', 'xztar'):
-        shutil.make_archive(f'sharing/{u.fnam_norm(project)}', ar_format, tmpdir)
+  make_shareables(df.copy())
 
   #Output data for analysis
   #Much the same as the data sharing platform output, but everything goes into a single file and classifications outside of the relevant date range are dropped
