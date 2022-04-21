@@ -295,6 +295,8 @@ def make_shareables(copied_df):
         return '<UNLISTED SUBJECT>'
       else: return loc['0']
     proj_df['location.zooniverse.plain'] = proj_df.subject_ids.apply(parse_subj_loc)
+    if project == d.SB:
+      proj_df['location.zooniverse.plain'] = 'https://tanc-ahrc.github.io/EngagingCrowds/galleries/terms_wrapper.html?img=' + proj_df['location.zooniverse.plain']
 
     with tempfile.TemporaryDirectory('.') as tmpdir:
       basedir = f'{tmpdir}/{u.fnam_norm(project)}_data'
