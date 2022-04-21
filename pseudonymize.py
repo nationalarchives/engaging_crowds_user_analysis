@@ -407,7 +407,7 @@ def read_workflow(workflow):
 
     #Remove the single top-level key (which is the subject id) and just return the info about this subject
     #(See https://www.geeksforgeeks.org/python-get-the-first-key-in-dictionary/ for the next iter trick)
-    return subj_info[next(iter(subj_info))] 
+    return subj_info[next(iter(subj_info))]
   df = expand_json(df, 'subject_data', ALL_SUBJECT_KEEPERS + WORKFLOW_SUBJECT_KEEPERS[workflow], 'subj', parse_subj_info)
 
   return df
