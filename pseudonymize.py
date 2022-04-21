@@ -65,7 +65,7 @@ EARLY_WORKFLOW_NAMES = {
 METADATA_KEEPERS = ['started_at', 'finished_at', 'utc_offset']
 ALL_SUBJECT_KEEPERS = ['#priority', 'retired.retired_at']
 _HMS_NHS_SUBJECT_KEEPERS = ['Filename']
-_RBGE_SUBJECT_KEEPERS = ['Botanist','Group','Format','Species','Barcode']
+_RBGE_SUBJECT_KEEPERS = ['id', 'Botanist','Group','Image','Format','Species','Barcode']
 WORKFLOW_SUBJECT_KEEPERS = {
   18504: ['Date', 'Page', 'Catalogue', 'image'],
   18505: ['Surnames starting with', 'image'],
