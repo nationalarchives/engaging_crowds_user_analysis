@@ -212,8 +212,9 @@ pseudonym                    Pseudonym for the user who made the classification.
 md.started_at                Client-side UTC start date/time of classification
 md.finished_at               Client-side UTC finish date/time of classification
 md.utc_offset                Offset from client's local time to UTC (subtract utc_offset to convert to local time)
-location.zooniverse          Location of the classified file on the Zooniverse servers
 {nl.join(filter(lambda x: len(x.strip()), [LOCATION_DESCRIPTIONS[p] for p in projects]))}
+location.zooniverse.project  Location of the subject in the project's index
+location.zooniverse.plain    Location of the subject image on the Zooniverse servers
 '''
   return blurb
 
