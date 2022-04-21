@@ -133,6 +133,90 @@ WORKFLOW_STARTSTAMP = {
 
 STOPSTAMP = '2022-02-01T00:00:00.000000'
 
+SUBJECT_DESCRIPTIONS = {
+  d.HMS: ["subj.filename                Filename of the image (used in 'HMS NHS')"],
+  d.RBGE: ['subj.id                      Unique identifier for the specimen',
+           'subj.botanist                The botanist who collected the specimen',
+           'subj.group                   The geographical region that the specimen was collected from',
+           "subj.image                   Filename of the image (used in 'Scarlets and Blues' and 'The RBGE Herbarium')",
+           "subj.format                  The format of the record itself (either 'herbarium sheet' or 'herbarium specimen')",
+           'subj.species                 The species of the specimen',
+           'subj.barcode                 Barcode used to identify the specimen',
+  ],
+  d.SB:['subj.date                    Date of the meeting',
+        'subj.page                    Page number in the minute book',
+        '''subj.catalogue               Intended catalogue reference for the transcription. Only the top two levels
+                             exist in the catalogue at time of writing. The third level will be added as
+                             one of the outputs from this project.''',
+        "subj.image                   Filename of the image (used in 'Scarlets and Blues' and 'The RBGE Herbarium')",
+        'subj.surnames starting with  First letter(s) of surnames on the page',
+  ],
+}
+
+LOCATION_DESCRIPTIONS = {
+  d.HMS: '',
+  d.RBGE: 'location.rbge                Citable location of the classified file on the RBGE website',
+  d.SB:   'location.tna                 Location of the classified file in the TNA online catalogue',
+}
+
+def readme_blurb(projects):
+  from os import linesep as nl
+  blurb = f'''Replication of this data requires access to the original classifications, which is limited to the project team.
+However, the reproduction reciple is:
+* git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
+* cd engagingcrowds_engagement
+* git co {u.git_HEAD()}
+* pip install pandas@1.4.1 #You might prefer to do this in a virtualenv
+* (Download the original project export files from all Engaging Crowds projects to engagingcrowds_engagement/exports/)
+* ./pseudonymise.py
+
+Pseudonyms are randomly generated so will differ from run to run. They are unique per user-id.
+
+The original usernames have been replaced by the pseudonyms and metadata has been expanded out
+into individual columns. All user-defined subject metadata is included, prefixed with 'subj.'.
+Metadata relating to the classification itself is prefixed with 'md.'.
+
+Zooniverse-defined data is limited to the fields that were useful for the engagement analysis.
+This includes subj.retired.retired_at, md.started_at, md.finished_at and md.utc_offset.
+
+Fields in mixed case are all treated as the same field, as are fields differing only by the
+presence or absence of a single '#' character. Fields are all presented as lower case in this
+output.
+
+The columns are as follows:
+
+classification_id            Unique identifier for the classification
+workflow_id                  Unique identifier for the workflow within which the classification was made'''
+  if not type(projects) is str: #We know that this means we are doing the readme for all_classifications.csv
+    blurb += """
+                             ID 1 is a made-up ID number for the 'Attendance' branch for the 'Meetings' workflow in
+                             'Scarlets and Blues' (see 'workflow_name', below)"""
+  blurb += '''
+workflow_name                The human-readable name of the workflow within which the classification was made'''
+  if not type(projects) is str: #We know that this means we are doing the readme for all_classifications.csv
+    blurb += """
+                             'Attendance' is the branch of the 'Meetings' workflow for dealing with the initial 'attendance and standard minutes'
+                             page of a set of meeting minutes. It is treated as a separate workflow for analysis purposes."""
+  blurb += f'''
+workflow_version             The version of the workflow within which the classification was made
+created_at                   The server-side date/time that the classification was made
+subject_ids                  Unique identifier of the subject to which the classification applied.
+                             There is only ever 1 subject id per classification in the Engaging Crowds projects.
+subj.#priority               Number used by the indexer to order the subjects.
+subj.retired.retired_at      UTC date/time that the subject acquired enough classifications to be considered complete.
+{nl.join(dict.fromkeys([line for p in projects for line in SUBJECT_DESCRIPTIONS[p]]).keys())}
+pseudonym                    Pseudonym for the user who made the classification. Pseudonyms are consistent across all three projects.
+                             A pseudonym beginning 'user': indicates a logged-in user. A pseudonym beginning 'anon:' indicates an
+                             anonymous user, identified by a hash of their IP address. This should be treated as a much less reliable
+                             identification than a user login.
+md.started_at                Client-side UTC start date/time of classification
+md.finished_at               Client-side UTC finish date/time of classification
+md.utc_offset                Offset from client's local time to UTC (subtract utc_offset to convert to local time)
+location.zooniverse          Location of the classified file on the Zooniverse servers
+{nl.join(filter(lambda x: len(x.strip()), [LOCATION_DESCRIPTIONS[p] for p in projects]))}
+'''
+  return blurb
+
 parser = argparse.ArgumentParser()
 parser.add_argument('workflows',
                     nargs = '*',
@@ -434,19 +518,7 @@ def main():
       basedir = f'{tmpdir}/{u.fnam_norm(project)}_data'
       os.mkdir(basedir)
       with open(f'{basedir}/README.txt', 'w') as f:
-        f.write(f'''Generated by {os.path.basename(__file__)} with git status {u.git_condition()}
-Replication of this data requires access to the original classifications, which is limited to the project team.
-However, the reproduction reciple is:
-* git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
-* cd engagingcrowds_engagement
-* git co {u.git_HEAD()}
-* pip install pandas@1.4.1 #You might prefer to do this in a virtualenv
-* (Download the original project export files to engagingcrowds_engagement/exports/)
-* ./pseudonymise.py {' '.join(str(x) for x in proj_df.workflow_id.unique())}
-
-Pseudonyms are randomly generated so will differ from run to run. They are unique per user-id.
-
-''')
+        f.write(f'Generated by {os.path.basename(__file__)} with git status {u.git_condition()}' + '\n' + readme_blurb([project]))
       proj_df.to_csv(f'{basedir}/classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
       for ar_format in ('zip', 'xztar'):
         shutil.make_archive(f'sharing/{u.fnam_norm(project)}', ar_format, tmpdir)
@@ -468,18 +540,7 @@ Pseudonyms are randomly generated so will differ from run to run. They are uniqu
   df = df[df['md.finished_at'] < np.datetime64(STOPSTAMP)]
 
   with open('README_all_classifications', 'w') as f:
-    f.write(f'''all_classifications.csv generated by {os.path.basename(__file__)} with git status {u.git_condition()}
-Replication of this data requires access to the original classifications, which is limited to the project team.
-However, the reproduction reciple is:
-* git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
-* cd engagingcrowds_engagement
-* git co {u.git_HEAD()}
-* pip install pandas@1.4.1 #You might prefer to do this in a virtualenv
-* (Download the original project export files from all Engaging Crowds projects to engagingcrowds_engagement/exports/)
-* ./pseudonymise.py
-
-Pseudonyms are randomly generated so will differ from run to run. They are unique per user-id.
-''')
+    f.write(f'all_classifications.csv generated by {os.path.basename(__file__)} with git status {u.git_condition()}' + '\n' + readme_blurb([d.SB, d.HMS, d.RBGE]))
   df.to_csv('all_classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
 
   #paranoia checks
