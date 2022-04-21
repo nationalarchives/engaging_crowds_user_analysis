@@ -114,6 +114,12 @@ workflow_map = {
   19385: 'trans-num'   #Reading numbers (lat/long) off a label
 }
 
+PROJECT_URLS = {
+  SB:   'https://www.zooniverse.org/projects/bogden/scarlets-and-blues/',
+  HMS:  'https://www.zooniverse.org/projects/msalmon/hms-nhs-the-nautical-health-service/',
+  RBGE: 'https://www.zooniverse.org/projects/emhaston/the-rbge-herbarium-exploring-gesneriaceae-the-african-violet-family/',
+}
+
 WORKFLOW_TYPES_BACKMAP = {}
 for k, v in workflow_map.items():
   if v in WORKFLOW_TYPES_BACKMAP: WORKFLOW_TYPES_BACKMAP[v].append(k)
