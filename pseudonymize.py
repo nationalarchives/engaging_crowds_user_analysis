@@ -161,29 +161,41 @@ LOCATION_DESCRIPTIONS = {
 
 def readme_blurb(projects):
   from os import linesep as nl
-  blurb = f'''Replication of this data requires access to the original classifications, which is limited to the project team.
-However, the reproduction reciple is:
-* git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
-* cd engagingcrowds_engagement
-* git co {u.git_HEAD()}
-* pip install pandas@1.4.1 #You might prefer to do this in a virtualenv
-* (Download the original project export files from all Engaging Crowds projects to engagingcrowds_engagement/exports/)
-* ./pseudonymise.py
+  blurb = f'''About This Data
+===============
 
-Pseudonyms are randomly generated so will differ from run to run. They are unique per user-id.
+This data describes the individual classifications made by volunteers. It is provided as a
+Comma Separated Values (CSV) file. The easiest way to view the data is to open it in
+standard spreadsheet software such as Excel, Numbers or Google sheets. This will show the
+data as a table, with column headings at the top. These column headings label the 'fields'
+making up the data. A field is a single entity in the data, such as a user name or the time
+at which a classification was completed. Each row in the table gives information about a
+single classification of a single record by a single volunteer.
 
-The original usernames have been replaced by the pseudonyms and metadata has been expanded out
-into individual columns. All user-defined subject metadata is included, prefixed with 'subj.'.
-Metadata relating to the classification itself is prefixed with 'md.'.
+The original Zooniverse data export contains more, and differently structured, data. In
+particular, it includes two metadata (data about data) columns, one describing the record
+being classified and one describing the act of classification itself. These metadata columns
+contain multiple fields for each row, which we 'flatten' into separate columns. Metadata
+field names describing the records are prefixed with 'subj.'. Metadata field names
+describing the act of classification are prefixed with 'md.'
 
-Zooniverse-defined data is limited to the fields that were useful for the engagement analysis.
-This includes subj.retired.retired_at, md.started_at, md.finished_at and md.utc_offset.
+All of the classification metadata comes from the Zooniverse platform. Some of the record
+metadata comes from the platform and the rest is provided by project administrators. We
+keep all of the metadata that comes from the administrators but discard most of the metadata
+that comes from the platform. The metadata that we keep from the platform is just that which
+was useful for our engagement analysis, which is:
+  * subj.retired.retired_at
+  * md.started_at
+  * md.finished_at
+  * md.utc_offset
+All other data from the Zooniverse data export is included but user names have been replaced
+by pseudonyms.
 
-Fields in mixed case are all treated as the same field, as are fields differing only by the
-presence or absence of a single '#' character. Fields are all presented as lower case in this
-output.
+Field names in mixed case are all treated as being the same field, as are field names differing
+only by the presence or absence of a single '#' character. Field names are all presented in
+lower case in this CSV file.
 
-The columns are as follows:
+The complete list of fields that we provide is:
 
 classification_id            Unique identifier for the classification
 workflow_id                  Unique identifier for the workflow within which the classification was made'''
@@ -215,6 +227,71 @@ md.utc_offset                Offset from client's local time to UTC (subtract ut
 {nl.join(filter(lambda x: len(x.strip()), [LOCATION_DESCRIPTIONS[p] for p in projects]))}
 location.zooniverse.project  Location of the subject in the project's index
 location.zooniverse.plain    Location of the subject image on the Zooniverse servers
+
+
+Information on Reuse
+====================
+'''
+  if not type(projects) is str: blurb += '''
+HMS NHS
+-------
+'''
+  if projects == d.HMS or not type(projects) is str:
+    blurb += '''The records of the Dreadnought Seamen’s Hospital are Public Records (Crown copyright, see https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/), held by the National Maritime Museum as an official place of deposit under the terms of the Public Records Acts. The images of these records are used online by the National Maritime Museum with permission from Ancestry.
+
+The images are made available under the terms of the CC-BY-NC-ND 4.0 licence (https://creativecommons.org/licenses/by-nc-nd/4.0/). Users can view but not download the images. Users can re-use the images for non-commercial research, education or private study only.
+
+The data are transcriptions of Public Records, which are also covered by Crown Copyright. The data is made available under the terms of the Open Government Licence (OGL, see https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/), which is compatible with CC BY 4.0 licence (https://creativecommons.org/licenses/by/4.0/). Users can copy, publish, distribute, transmit and adapt the data for both commercial and non-commercial use.
+'''
+  if not type(projects) is str: blurb += '''
+Scarlets and Blues
+------------------
+'''
+  if projects == d.SB or not type(projects) is str:
+    blurb += '''(c) Images used in Scarlets and Blues are reproduced by permission of The National Archives. The National Archives does not guarantee the accuracy, completeness or fitness for the purpose of the information provided. Images may be used only for purposes of research, private study or education. Applications for any other use should be made to The National Archives Image Library at images@nationalarchives.gov.uk.
+
+The National Archives is a government department, which means that all of the material we create is subject to Crown copyright (https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/). Data produced by volunteers is available for re-use under the terms of the Open Government Licence (OGL, https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/). This licence allows people to copy, publish and distribute information, as long as they acknowledge its source. It is compatible with the CC BY 4.0 Licence (https://creativecommons.org/licenses/by/4.0/)and the Open Data Commons Attribution Licence (https://opendatacommons.org/licenses/by/).
+'''
+  if not type(projects) is str: blurb += '''
+The RBGE Herbarium
+------------------
+'''
+  if projects == d.RBGE or not type(projects) is str:
+    blurb += '''These images are licensed according to the CC BY 4.0 licence (https://creativecommons.org/licenses/by/4.0/). This licence allows people to freely use images as long as they give appropriate credit and indicate if any changes have been made.
+
+The data transcribed by volunteers is licensed according to the CC0 licence (https://creativecommons.org/share-your-work/public-domain/cc0). This licence means there are no copyright restrictions on this data and it can be freely reused.
+'''
+
+  blurb += '''
+
+Citation Information
+====================
+
+'''
+  if projects == d.HMS or not type(projects) is str:
+    blurb += "Any use of the images or data from HMS NHS should credit 'National Maritime Museum' as the source."
+  if not type(projects) is str: blurb += nl
+  if projects == d.SB or not type(projects) is str:
+    blurb += "Any use of the images or data from Scarlets and Blues should credit 'The National Archives' as the source."
+  if not type(projects) is str: blurb += nl
+  if projects == d.RBGE or not type(projects) is str:
+    blurb += "Any use of the images or data from The RBGE Herbarium should credit 'Royal Botanic Garden Edinburgh' as the source."
+
+  blurb += f'''
+
+Reproduction
+============
+
+Reproduction of this data requires access to the original classifications, which is limited to the project team.
+However, the reproduction recipe is:
+* git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
+* cd engagingcrowds_engagement
+* git co {u.git_HEAD()}
+* pip install pandas@1.4.1 #You might prefer to do this in a virtualenv
+* (Download the original project export files from all Engaging Crowds projects to engagingcrowds_engagement/exports/)
+* ./pseudonymise.py
+
+Pseudonyms are randomly generated so will differ from run to run. They are unique per user-id.
 '''
   return blurb
 
@@ -303,7 +380,7 @@ def make_shareables(copied_df):
       basedir = f'{tmpdir}/{u.fnam_norm(project)}_data'
       os.mkdir(basedir)
       with open(f'{basedir}/README.txt', 'w') as f:
-        f.write(f'Generated by {os.path.basename(__file__)} with git status {u.git_condition()}' + '\n' + readme_blurb([project]))
+        f.write(readme_blurb([project]))
       proj_df.to_csv(f'{basedir}/classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
       for ar_format in ('zip', 'xztar'):
         shutil.make_archive(f'sharing/{u.fnam_norm(project)}', ar_format, tmpdir)
@@ -546,7 +623,7 @@ def main():
   df = df[df['md.finished_at'] < np.datetime64(STOPSTAMP)]
 
   with open('README_all_classifications', 'w') as f:
-    f.write(f'all_classifications.csv generated by {os.path.basename(__file__)} with git status {u.git_condition()}' + '\n' + readme_blurb([d.SB, d.HMS, d.RBGE]))
+    f.write(readme_blurb([d.SB, d.HMS, d.RBGE]))
   df.to_csv('all_classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
 
   #paranoia checks
