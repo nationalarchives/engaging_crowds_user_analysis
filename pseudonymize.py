@@ -212,6 +212,9 @@ workflow_name                The human-readable name of the workflow within whic
   blurb += f'''
 workflow_version             The version of the workflow within which the classification was made
 created_at                   The server-side date/time that the classification was made
+annotations                  The volunteer's transcription of the record. This is a JSON structure recording the volunteer's path
+                             through the whole workflow for this record. Forthcoming scripts will reconcile these transcriptions
+                             into a convenient form to describe the records.
 subject_ids                  Unique identifier of the subject to which the classification applied.
                              There is only ever 1 subject id per classification in the Engaging Crowds projects.
 subj.#priority               Number used by the indexer to order the subjects.
@@ -595,7 +598,7 @@ def main():
   df = df.drop(['user_name', 'user_id', 'user_ip'], axis = 'columns')
 
   #Drop fields that we do not need at all
-  df = df.drop(['gold_standard', 'expert', 'annotations'], axis = 'columns')
+  df = df.drop(['gold_standard', 'expert'], axis = 'columns')
 
   print('Expanding metadata')
   #Expand out the interesting bits of the metadata, drop the rest
@@ -621,6 +624,8 @@ def main():
 
   df['md.finished_at'] = df['md.finished_at'].astype(np.datetime64)
   df = df[df['md.finished_at'] < np.datetime64(STOPSTAMP)]
+
+  df = df.drop('annotations', axis = 'columns')
 
   with open('README_all_classifications', 'w') as f:
     f.write(readme_blurb([d.SB, d.HMS, d.RBGE]))
