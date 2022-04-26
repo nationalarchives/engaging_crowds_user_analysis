@@ -161,6 +161,8 @@ LOCATION_DESCRIPTIONS = {
 
 def readme_blurb(projects):
   from os import linesep as nl
+  for_all = len(projects) == len(LOCATION_DESCRIPTIONS)
+  assert len(projects) == 1 or for_all
   blurb = f'''About This Data
 ===============
 
@@ -199,13 +201,13 @@ The complete list of fields that we provide is:
 
 classification_id            Unique identifier for the classification
 workflow_id                  Unique identifier for the workflow within which the classification was made'''
-  if not type(projects) is str: #We know that this means we are doing the readme for all_classifications.csv
+  if for_all:
     blurb += """
                              ID 1 is a made-up ID number for the 'Attendance' branch for the 'Meetings' workflow in
                              'Scarlets and Blues' (see 'workflow_name', below)"""
   blurb += '''
 workflow_name                The human-readable name of the workflow within which the classification was made'''
-  if not type(projects) is str: #We know that this means we are doing the readme for all_classifications.csv
+  if for_all:
     blurb += """
                              'Attendance' is the branch of the 'Meetings' workflow for dealing with the initial 'attendance and standard minutes'
                              page of a set of meeting minutes. It is treated as a separate workflow for analysis purposes."""
@@ -235,31 +237,31 @@ location.zooniverse.plain    Location of the subject image on the Zooniverse ser
 Information on Reuse
 ====================
 '''
-  if not type(projects) is str: blurb += '''
+  if for_all: blurb += '''
 HMS NHS
 -------
 '''
-  if projects == d.HMS or not type(projects) is str:
+  if for_all or projects[0] == d.HMS:
     blurb += '''The records of the Dreadnought Seamen’s Hospital are Public Records (Crown copyright, see https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/), held by the National Maritime Museum as an official place of deposit under the terms of the Public Records Acts. The images of these records are used online by the National Maritime Museum with permission from Ancestry.
 
 The images are made available under the terms of the CC-BY-NC-ND 4.0 licence (https://creativecommons.org/licenses/by-nc-nd/4.0/). Users can view but not download the images. Users can re-use the images for non-commercial research, education or private study only.
 
 The data are transcriptions of Public Records, which are also covered by Crown Copyright. The data is made available under the terms of the Open Government Licence (OGL, see https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/), which is compatible with CC BY 4.0 licence (https://creativecommons.org/licenses/by/4.0/). Users can copy, publish, distribute, transmit and adapt the data for both commercial and non-commercial use.
 '''
-  if not type(projects) is str: blurb += '''
+  if for_all: blurb += '''
 Scarlets and Blues
 ------------------
 '''
-  if projects == d.SB or not type(projects) is str:
+  if for_all or projects[0] == d.SB:
     blurb += '''(c) Images used in Scarlets and Blues are reproduced by permission of The National Archives. The National Archives does not guarantee the accuracy, completeness or fitness for the purpose of the information provided. Images may be used only for purposes of research, private study or education. Applications for any other use should be made to The National Archives Image Library at images@nationalarchives.gov.uk.
 
 The National Archives is a government department, which means that all of the material we create is subject to Crown copyright (https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/). Data produced by volunteers is available for re-use under the terms of the Open Government Licence (OGL, https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/). This licence allows people to copy, publish and distribute information, as long as they acknowledge its source. It is compatible with the CC BY 4.0 Licence (https://creativecommons.org/licenses/by/4.0/)and the Open Data Commons Attribution Licence (https://opendatacommons.org/licenses/by/).
 '''
-  if not type(projects) is str: blurb += '''
+  if for_all: blurb += '''
 The RBGE Herbarium
 ------------------
 '''
-  if projects == d.RBGE or not type(projects) is str:
+  if for_all or projects[0] == d.RBGE:
     blurb += '''These images are licensed according to the CC BY 4.0 licence (https://creativecommons.org/licenses/by/4.0/). This licence allows people to freely use images as long as they give appropriate credit and indicate if any changes have been made.
 
 The data transcribed by volunteers is licensed according to the CC0 licence (https://creativecommons.org/share-your-work/public-domain/cc0). This licence means there are no copyright restrictions on this data and it can be freely reused.
@@ -271,13 +273,13 @@ Citation Information
 ====================
 
 '''
-  if projects == d.HMS or not type(projects) is str:
+  if for_all or projects[0] == d.HMS:
     blurb += "Any use of the images or data from HMS NHS should credit 'National Maritime Museum' as the source."
-  if not type(projects) is str: blurb += nl
-  if projects == d.SB or not type(projects) is str:
+  if for_all: blurb += nl
+  if for_all or projects[0] == d.SB:
     blurb += "Any use of the images or data from Scarlets and Blues should credit 'The National Archives' as the source."
-  if not type(projects) is str: blurb += nl
-  if projects == d.RBGE or not type(projects) is str:
+  if for_all: blurb += nl
+  if for_all or projects[0] == d.RBGE:
     blurb += "Any use of the images or data from The RBGE Herbarium should credit 'Royal Botanic Garden Edinburgh' as the source."
 
   blurb += f'''
