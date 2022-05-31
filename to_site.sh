@@ -3,4 +3,4 @@
 HASH=`git rev-parse HEAD`
 
 DATA="$1"/docs/data
-cp sharing/{HMS_NHS,Scarlets_and_Blues,RBGE_Herbarium}.{zip,tar.xz} "${DATA}"
+cp sharing/{HMS_NHS,Scarlets_and_Blues,RBGE_Herbarium,data_analysis}.{zip,tar.xz} "${DATA}"
