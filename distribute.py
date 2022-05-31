@@ -17,7 +17,7 @@ with tempfile.TemporaryDirectory(dir = '.') as tmpdir:
   copytree(f'secrets/graphs/{git_hash}/', f'{inner_dir}/graphs/{git_hash}/', symlinks = True, ignore = ignore_patterns('static'), copy_function = os.link)
   with open(f'{inner_dir}/README.txt', 'a') as f:
     f.write(f'''
-To regenerate these charts:
+To regenerate the charts:
 * git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
 * cd engagingcrowds_engagement
 * git co {git_hash} #git co 97cedb41511b9494b750152b26d91cfe24bd46d1 to use the same version as the charts in the report
