@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import data as d
 import util as u
 
