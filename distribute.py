@@ -20,7 +20,7 @@ To regenerate these charts:
 * pip install pandas@1.4.1  #You might prefer to do this in a virtualenv
 * pip install plotly@5.6.0  #You might prefer to do this in a virtualenv
 * pip install kaleido@0.2.1 #You might prefer to do this in a virtualenv
-* wget tanc-ahrc.github.io/EngagingCrowds/data/all_classifications.csv #Or download all_classifications from URL TODO
+* wget https://tanc-ahrc.github.io/EngagingCrowds/data/all_classifications.csv
 * ./analyse.py
 Graphs will appear in secrets/graphs/{u.git_HEAD()}
 The CSV files can be used to confirm that the graphs are based upon the same input data
