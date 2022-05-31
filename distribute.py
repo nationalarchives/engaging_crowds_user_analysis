@@ -7,11 +7,13 @@ import util as u
 
 os.makedirs('sharing', exist_ok = True)
 with tempfile.TemporaryDirectory(dir = '.') as tmpdir:
-  copy('all_classifications.csv', tmpdir)
-  copy('README_all_classifications', f'{tmpdir}/README.txt')
+  inner_dir = f'{tmpdir}/data_analysis'
+  os.mkdir(inner_dir)
+  copy('all_classifications.csv', inner_dir)
+  copy('README_all_classifications', f'{inner_dir}/README.txt')
 
-  copytree(f'secrets/graphs/{u.git_HEAD()}/', f'{tmpdir}/graphs', symlinks = True, ignore = ignore_patterns('static'), copy_function = os.link)
-  with open(f'{tmpdir}/README.txt', 'a') as f:
+  copytree(f'secrets/graphs/{u.git_HEAD()}/', f'{inner_dir}/graphs', symlinks = True, ignore = ignore_patterns('static'), copy_function = os.link)
+  with open(f'{inner_dir}/README.txt', 'a') as f:
     f.write(f'''
 To regenerate these charts:
 * git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
