@@ -134,11 +134,11 @@ WORKFLOW_STARTSTAMP = {
 STOPSTAMP = '2022-02-01T00:00:00.000000'
 
 SUBJECT_DESCRIPTIONS = {
-  d.HMS: ["subj.filename                Filename of the image (used in 'HMS NHS')"],
+  d.HMS: ["subj.filename                Filename of the image"],
   d.RBGE: ['subj.id                      Unique identifier for the specimen',
            'subj.botanist                The botanist who collected the specimen',
            'subj.group                   The geographical region that the specimen was collected from',
-           "subj.image                   Filename of the image (used in 'Scarlets and Blues' and 'The RBGE Herbarium')",
+           "subj.image                   Filename of the image",
            "subj.format                  The format of the record itself (either 'herbarium sheet' or 'herbarium specimen')",
            'subj.species                 The species of the specimen',
            'subj.barcode                 Barcode used to identify the specimen',
@@ -148,7 +148,7 @@ SUBJECT_DESCRIPTIONS = {
         '''subj.catalogue               Intended catalogue reference for the transcription. Only the top two levels
                              exist in the catalogue at time of writing. The third level will be added as
                              one of the outputs from this project.''',
-        "subj.image                   Filename of the image (used in 'Scarlets and Blues' and 'The RBGE Herbarium')",
+        "subj.image                   Filename of the image",
         'subj.surnames starting with  First letter(s) of surnames on the page',
   ],
 }
@@ -166,36 +166,13 @@ def readme_blurb(projects):
   blurb = f'''About This Data
 ===============
 
-This data describes the individual classifications made by volunteers. It is provided as a
-Comma Separated Values (CSV) file. The easiest way to view the data is to open it in
-standard spreadsheet software such as Excel, Numbers or Google sheets. This will show the
-data as a table, with column headings at the top. These column headings label the 'fields'
-making up the data. A field is a single entity in the data, such as a user name or the time
-at which a classification was completed. Each row in the table gives information about a
-single classification of a single record by a single volunteer.
-
-The original Zooniverse data export contains more, and differently structured, data. In
-particular, it includes two metadata (data about data) columns, one describing the record
-being classified and one describing the act of classification itself. These metadata columns
-contain multiple fields for each row, which we 'flatten' into separate columns. Metadata
-field names describing the records are prefixed with 'subj.'. Metadata field names
-describing the act of classification are prefixed with 'md.'
-
-All of the classification metadata comes from the Zooniverse platform. Some of the record
-metadata comes from the platform and the rest is provided by project administrators. We
-keep all of the metadata that comes from the administrators but discard most of the metadata
-that comes from the platform. The metadata that we keep from the platform is just that which
-was useful for our engagement analysis, which is:
-  * subj.retired.retired_at
-  * md.started_at
-  * md.finished_at
-  * md.utc_offset
-All other data from the Zooniverse data export is included but user names have been replaced
-by pseudonyms.
-
-Field names in mixed case are all treated as being the same field, as are field names differing
-only by the presence or absence of a single '#' character. Field names are all presented in
-lower case in this CSV file.
+This data describes the individual classifications made by volunteers in this Zooniverse
+project. It is provided as a Comma Separated Values (CSV) file. The easiest way to view the
+data is to open it in standard spreadsheet software such as Excel, Numbers or Google sheets.
+This will show the data as a table, with column headings at the top. These column headings
+label the 'fields' making up the data. A field is a single entity in the data, such as a user
+name or the time at which a classification was completed. Each row in the table gives
+information about a single classification of a single record by a single volunteer.
 
 The complete list of fields that we provide is:
 
@@ -232,6 +209,33 @@ md.utc_offset                Offset from client's local time to UTC (subtract ut
 {nl.join(filter(lambda x: len(x.strip()), [LOCATION_DESCRIPTIONS[p] for p in projects]))}
 location.zooniverse.project  Location of the subject in the project's index
 location.zooniverse.plain    Location of the subject image on the Zooniverse servers
+
+
+Alterations to the Original Data
+================================
+
+The original Zooniverse data export contains two metadata columns: record metadata, describing
+the record being classified, and classification metadata, describing the act of classification.
+Each row in these metadata columns contains multiple fields which we 'flatten' into
+new columns. Record metadata fields are prefixed with 'subj.' Classification metadata
+fields are prefixed with 'md.'
+
+Classification metadata is provided by the Zooniverse platform. Some record metadata is
+provided by the Zooniverse platform and some is provided by project administrators. We keep
+all of the metadata that comes from the project administrators but discard most of the metadata
+that comes from the platform. The following platform-provided metadata fields are useful for
+our engagment analysis and so are kept:
+  * subj.retired.retired_at
+  * md.started_at
+  * md.finished_at
+  * md.utc_offset
+
+Metadata field names in mixed case are all treated as being the same field, as are field names
+differing only by the presence or absence of a single '#' character. Field names are all presented in
+lower case in this CSV file.
+
+All other data from the Zooniverse data export is included here, but user names have been replaced
+by pseudonyms.
 
 
 Information on Reuse
