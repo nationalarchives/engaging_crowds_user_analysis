@@ -13,8 +13,6 @@ with tempfile.TemporaryDirectory(dir = '.') as tmpdir:
   copy('README_all_classifications', f'{inner_dir}/README.txt')
 
   git_hash = u.git_HEAD()
-  os.mkdir(f'{inner_dir}/graphs')
-  copytree(f'secrets/graphs/{git_hash}/', f'{inner_dir}/graphs/{git_hash}/', symlinks = True, ignore = ignore_patterns('static'), copy_function = os.link)
   with open(f'{inner_dir}/README.txt', 'a') as f:
     f.write(f'''
 To regenerate the charts:
@@ -26,9 +24,6 @@ To regenerate the charts:
 * pip install kaleido@0.2.1 #You might prefer to do this in a virtualenv
 * wget https://tanc-ahrc.github.io/EngagingCrowds/data/all_classifications.csv
 * ./analyse.py
-Graphs will appear in secrets/graphs/{git_hash}
-The CSV files can be used to confirm that the graphs are based upon the same input data
-The overall run log and the *_desc.txt files contain additional data.
 
 ''')
 
