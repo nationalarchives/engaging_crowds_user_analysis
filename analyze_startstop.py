@@ -5,6 +5,12 @@ import plotly.express as px
 import os
 from multiprocessing import Process
 
+#Re https://plotly.com/python/marker-style/
+#Or import plotly;print(plotly.validators.scatter.marker.SymbolValidator().values)
+def SYMBOLS():
+  #Figure output seems to go wrong for some orderings of these numbers, and for some symbols
+  for x in (0, 5, 3, 1, 18, 25, 2, 17, 20, 4, 22, 21, 26, 27): yield x
+
 def drawit(label, df, filepath, filename):
   first_time = df.groupby('pseudonym')['md.started_at'].min().dt.date
   first_time = first_time.value_counts()
@@ -79,12 +85,36 @@ def start_stop_dates(df, subsets):
 
   for project, wids in d.PROJECTS.items():
     import plotly.graph_objects as go
-    fig = go.Figure(layout = { 'colorway': px.colors.qualitative.Light24 }) #re https://plotly.com/python/discrete-color/
+    fig = go.Figure(layout = { 'colorway': px.colors.qualitative.Dark24, #re https://plotly.com/python/discrete-color/
+                               'template': 'simple_white',
+    })
     fig.update_layout(title = f'Active volunteers on {project} {[u.git_condition()]}')
     for wid in wids:
       fig.add_trace(go.Scatter(x = actives[wid].index, y = actives[wid].values, name = d.LABELS[wid]))
+
+    if project == d.HMS: #Special case, as this one is cluttered
+      #Line-only
+      fig.update_traces(line_width = 4)
+      fig.write_image(proj_path + '/static/' + u.fnam_norm(project) + '_agg_gain_line.png', width = 1600, height = 1200)
+      fig.write_html(proj_path + '/dynamic/' + u.fnam_norm(project) + '_agg_gain_line.html')
+
+      #Letter-only (experimental)
+      import string
+      letters = (x for x in string.ascii_uppercase)
+      fig.for_each_trace(lambda x: x.update(mode = 'text', text=next(letters)))
+      fig.update_traces(textfont_size = 8)
+      fig.write_image(proj_path + '/static/' + u.fnam_norm(project) + '_agg_gain_letters.png', width = 1600, height = 1200)
+      fig.write_html(proj_path + '/dynamic/' + u.fnam_norm(project) + '_agg_gain_letters.html')
+
+    #Alter the figure to work nicely with symbols, and put the symbols in
+    if project == d.HMS: fig.update_traces(mode =       'markers', marker_size = 6) #Big symbols on this one will just smoosh together, lines make it even more cluttered
+    else:                fig.update_traces(mode = 'lines+markers', marker_size = 8, line_width = 1, line_dash = 'dot')
+    symbols = SYMBOLS()
+    fig.for_each_trace(lambda x: x.update(marker_symbol = next(symbols)))
     fig.write_image(proj_path + '/static/' + u.fnam_norm(project) + '_agg_gain.png', width = 1600, height = 1200)
     fig.write_html(proj_path + '/dynamic/' + u.fnam_norm(project) + '_agg_gain.html', include_plotlyjs = 'directory')
+
+    #Data is the same for all of the above figure variations
     pd.Series().append([actives[x] for x in wids]).to_csv(proj_path + '/' + u.fnam_norm(project) + '_agg_gain.csv', mode = 'x')
 
   special_workflow_map = {
@@ -95,10 +125,15 @@ def start_stop_dates(df, subsets):
   }
 
   for w_type, t_wids in special_workflow_map.items():
-    fig = go.Figure(layout = { 'colorway': px.colors.qualitative.Light24 }) #re https://plotly.com/python/discrete-color/
+    fig = go.Figure(layout = { 'colorway': px.colors.qualitative.Dark24, #re https://plotly.com/python/discrete-color/
+                               'template': 'simple_white'
+    })
     fig.update_layout(title = f'Active volunteers on HMS NHS ({w_type}) {[u.git_condition()]}')
     for t_wid in t_wids:
       fig.add_trace(go.Scatter(x = actives[t_wid].index, y = actives[t_wid].values, name = d.LABELS[t_wid]))
+    fig.update_traces(mode = 'lines+markers', marker_size = 8, line_width = 1, line_dash = 'dot')
+    symbols = SYMBOLS()
+    fig.for_each_trace(lambda x: x.update(marker_symbol = next(symbols)))
     fig.write_image(type_path + '/static/' + u.fnam_norm(w_type) + '_agg_gain.png', width = 1600, height = 1200)
     fig.write_html(type_path + '/dynamic/' + u.fnam_norm(w_type) + '_agg_gain.html', include_plotlyjs = 'directory')
     pd.Series().append([actives[x] for x in t_wids]).to_csv(type_path + '/' + u.fnam_norm(w_type) + '_agg_gain.csv', mode = 'x')

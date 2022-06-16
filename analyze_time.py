@@ -74,8 +74,20 @@ def start_times(start_df, subsets):
     fig = px.density_heatmap(heat_data, x = 'day', y = 'period',
                              histnorm = 'percent', histfunc = 'count',
                              marginal_x = 'histogram', marginal_y = 'histogram',
-                             title = title,
+                             title = title, template = 'simple_white',
+                             color_continuous_scale = px.colors.sequential.Greys,
                              category_orders = {'day': DAYS, 'period': PERIODS})
+
+    #FIXME? Is this a layering violation? (in other words, should I be going through some interface, rather
+    #       than manipulating this data structure directly?) The effect of this code is to draw the histograms
+    #       at the edges of the chart with a pattern rather than solid fill colour.
+    #Re https://plotly.com/python/reference/histogram/
+    marker_top   = dict(color = 'black', line_color = 'black', pattern_fillmode = 'replace', pattern = dict(fillmode = 'replace', shape = '/'))
+    marker_right = dict(color = 'black', line_color = 'black', pattern_fillmode = 'replace', pattern = dict(fillmode = 'replace', shape = '\\'))
+    fig['data'][1]['marker'] = marker_top
+    fig['data'][2]['marker'] = marker_right
+    for x in (1, 2): fig['data'][x]['opacity'] = 1
+
     fig.write_image(filepath + '/static/' + filename + identifier + '.svg', width = 1600, height = 1200)
     fig.write_image(filepath + '/static/' + filename + identifier + '.png', width = 1600, height = 1200)
     fig.write_html(filepath + '/dynamic/' + filename + identifier + '.html', include_plotlyjs = 'directory')
