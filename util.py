@@ -13,6 +13,9 @@ def git_report_original():
 def git_report_final():
   return git.cmd.Git('.').rev_list('report_final', n=1)
 
+def git_report_final_deps():
+  return git.cmd.Git('.').rev_list('report_final_deps', n=1)
+
 def git_HEAD():
   return git.cmd.Git('.').rev_parse('HEAD')
 
