@@ -1,18 +1,20 @@
 # Getting Started
 
-These instructions assume that you are working with a pseudionymized classifications file downloaded from the Engaging Crowds' [data sharing platform](https://tanc-ahrc.github.io/EngagingCrowds/Data).
+These instructions assume that you are working with a pseudonymized classifications file downloaded from the Engaging Crowds' [data sharing platform](https://tanc-ahrc.github.io/EngagingCrowds/Data).
+
+If you are intending to reproduce the charts presented in the Engaging Crowds project report, please start with the README in the downloadable at the [Engagement Analysis page](https://tanc-ahrc.github.io/EngagingCrowds/Engagement%20Analysis%20Data.html) of the data sharing platform.
 
 ## Set Up Environment
 
 Clone this project
 ```
- git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
+ git clone https://github.com/nationalarchives/engaging_crowds_user_analysis.git
 ```
 
 Install the dependencies. It is often a good idea to do this inside a virtualenv.
 ```
 mkvirtualenv ec_engagement
-pip install pandas
+pip install -r requirements.txt
 ```
 
 > :warning: The original requirements.txt used to generate data for the report was
@@ -21,7 +23,7 @@ generate the same results.
 
 Create the `secrets/` directory.
 ```
-mkdir engagingcrowds_engagement/secrets
+mkdir engaging_crowds_user_analysis/secrets
 chmod 700 secrets #if required by your privacy policies
 ```
 
@@ -35,14 +37,14 @@ You can either use pre-pseudonymised data from the Engaging Crowds project or cl
 * Unpack the zip or tarball that you have downloaded
   * `unzip data_analysis.zip`
   * `tar xf data_analysis.tar.xz`
-* `cp data_analysis/all_classifications.csv engagingcrowds_engagement`
+* `cp data_analysis/all_classifications.csv engaging_crowds_user_analysis`
 
 ### Use Your Own Classifications
 
 Create a directory to store your exports:
 ```
-mkdir engagingcrowds_engagement/exports
-chmod 700 engagingcrowds_engagement/exports #if required by your privacy policies
+mkdir engaging_crowds_user_analysis/exports
+chmod 700 engaging_crowds_user_analysis/exports #if required by your privacy policies
 ```
 
 Download the classifications from your Zooniverse project(s). At time of writing, this requires:
@@ -50,19 +52,19 @@ Download the classifications from your Zooniverse project(s). At time of writing
 * Select your project
 * Go to `Data Exports`
 * Press `Request new workflow classification export`
-* Select the appropriate workflow and download to `engagingcrowds_engagement/exports`
+* Select the appropriate workflow and download to `engaging_crowds_user_analysis/exports`
 * Repeat for as many workflows/projects as you need
 
 Run the pseudonymizer
 ```
-cd engagingcrowds_engagement
+cd engaging_crowds_user_analysis
 ./pseudonymize.py
 ```
 > :warning: There are assumptions relating to Engaging Crowds in the scripts. You will likely need to change them to work with your project. This should really be engineered so that the script can be easily configured for different projects: patches welcome.
 
 This creates:
 * `all_classifications.csv`: Pseudonymised classifications from all workflows, suitable to input to `analyze.py`
-* `secrets/*-classifications.csv`: More lightly altered pseudonymized classifications, with one file per workflow. These should be more suitable for analysis with scripts published by Zooniverse.
+* `secrets/*-classifications.csv`: More lightly altered pseudonymized classifications, with one file per workflow. These maintain the structure of the original export files with key information pseudonymized. They are thus suitable for use with other scripts for working with Zooniverse outputs.
 * `secrets/identities.json`: Dictionary mapping user ids to pseudonyms
 * `sharing/*.{zip,tar.xz}`: Pseudonymised data packaged for the data sharing platform
 * `README_all_classifications`: A README for the data sharing platform. This can be packaged by `share_analysis.py`.
@@ -83,7 +85,7 @@ The files for the data sharing platform contain pseudonymised classifications fo
 
 Just run the analysis script.
 ```
-cd engagingcrowds_engagement
+cd engaging_crowds_user_analysis
 ./analyze.py
 ```
 
@@ -122,7 +124,7 @@ There may be bugs in the code that generates these graphs, especially for graphs
 
 # Sharing Data
 
-The data sharing code is just for creating deliverables for the Engaging Crowds [data sharing platform](https://tanc-ahrc.github.io/EngagingCrowds/Data). At time of writing, the pseudonymisation step places most of this data in `engagingcrowds_engagement/sharing/`. The data used as input to the analysis step can be added by running `./share_analysis.py`.[^1]
+The data sharing code is just for creating deliverables for the Engaging Crowds [data sharing platform](https://tanc-ahrc.github.io/EngagingCrowds/Data). At time of writing, the pseudonymisation step places most of this data in `engaging_crowds_user_analysis/sharing/`. The data used as input to the analysis step can be added by running `./share_analysis.py`.[^1]
 
 [^1]: At one time, outputs from `analyze.py` were included in the bundle for the data sharing platform. This is no longer the case and so the functionality in `share_analysis.py` could just be merged into `pseudonymise.py`.
 
@@ -147,25 +149,25 @@ Several of the Python files are libaries used by other scripts.
 
 * `check_csv_dumps.sh` Compares CSV files dumped by the analysis script in latest commit vs a particular previous run. Would have been used to check that changes had only the desired effect.
 * `cmp_svg.sh` Assists with comparing SVG files dumped as charts by the analysis scripts. Unlike many image formats, SVG can be reasonably compared with text-comparison techniques. This would have been used to check that changes had only the desired effect.
-* `exploration.ipynb` A Jupyter Notebook used for early exploration of the data.
 * `jsondump.py` Dumps the names of all JSON key-value pairs in the JSON-formatted fields in the raw classification data. Used to find fields of interest for analysis, and to scan for potential personal data.
 * `show_graphs.sh` Opens groups of related graphs in Chrome tabs. More fine-grained than some of the other `show_*.sh` scripts.
 * `show_projects.sh` Opens graphs for each Engaging Crowds project in Chrome tabs.
 * `show_types.sh` Opens graphs for each of the HMS NHS workflow types in Chrome tabs.
 * `show_workflows.sh` Opens graphs for each Engaging Crowds workflow in Chrome tabs.
-* `times.ipynb` A Jupyter Notebook used for early exploration of the data.
 * `us.sh` Script for identifying classifications by particular users. Used to find classifications made by members of the Engaging Crowds project team.
 * `zooniscript.sh` A driver for existing analysis scripts published by Zooniverse.
 
-# Potential Future Work
+# Some notes/bugs/future work
 
 Features specific to Engaging Crowds could be removed or factored out to be contolled by command-line switches or configuration files. This would make the scripts more immediately usable for other Zooniverse projects.
 
-It would make sense to divide the functions of the scripts out more logically. For example, at present files for the data sharing platform are generated by the same scripts that do the analysis work.
+It would make sense to divide the functions of the scripts out more logically. For example, at present files for the data sharing platform are generated by the same scripts that do the pseudonymization.
 
 Testing could be much improved.
 
 A general refactoring/tidy-up would be helpful -- in particular there are some rushed late changes that produced some needed outputs but do not make for great code (e.g. the code in `analyze_startstop.py` that uses the `actives` dictionary to generate the "active volunteer" charts).
+
+The counting of 'mono' vs 'plural' contributors currently does not make sense. This was excluded from analysis but may still be referred to in logs. See FIXME in analyze.py.
 
 # Copyright and License
 
