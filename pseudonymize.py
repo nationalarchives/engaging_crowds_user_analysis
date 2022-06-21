@@ -296,8 +296,8 @@ Reproduction of this data requires access to the original classifications, which
 However, the reproduction recipe is:
 * git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
 * cd engagingcrowds_engagement
-* git co {u.git_HEAD()}
-* pip install pandas@1.4.1 #You might prefer to do this in a virtualenv
+* git checkout {u.git_HEAD()} #Optional, to use the scripts at the point when this bundle was generated
+* pip install -r requirements.txt #You might prefer to do this in a virtualenv
 * (Download the original project export files from all Engaging Crowds projects to engagingcrowds_engagement/exports/)
 * ./pseudonymise.py
 

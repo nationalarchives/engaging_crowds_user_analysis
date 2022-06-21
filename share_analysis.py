@@ -63,16 +63,28 @@ git stash && git checkout {u.git_report_final_deps()} && cp requirements.txt sec
   git_hash = u.git_HEAD()
   with open(f'{inner_dir}/README.txt', 'a') as f:
     f.write(f'''
-To regenerate the charts:
+To generate the charts:
 * git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
+* cp all_classifications.csv engagingcrowds_engagement
 * cd engagingcrowds_engagement
-* git co {git_hash} #git co 97cedb41511b9494b750152b26d91cfe24bd46d1 to use the same version as the charts in the report
-* pip install pandas@1.4.1  #You might prefer to do this in a virtualenv
-* pip install plotly@5.6.0  #You might prefer to do this in a virtualenv
-* pip install kaleido@0.2.1 #You might prefer to do this in a virtualenv
-* wget https://tanc-ahrc.github.io/EngagingCrowds/data/all_classifications.csv
-* ./analyse.py
+* pip install -r requirements.txt  #You might prefer to do this in a virtualenv
+* ./analyze.py
 
+Two sets of charts were generated in producing the report.
+
+The first set, produced by the commit tagged report_original, were used in the analysis described in the text of the report.
+
+The second set, produced by the commit tagged report_final, are the charts actually printed in the report. These versions of the charts have improved accessibility in some respects.
+
+To regenerate either set of charts using in producing the report, check out the appropriate tag before running ./analyse.py. For example:
+git checkout report_final
+The pip dependencies must be installed before the checkout is changed. This is because requirements.txt was commited at a later time.
+requirements.txt matches the dependencies used to generate both the final charts for the report and the contents of this bundle.
+The dependencies used for the analysis are lost but should at least be similar.
+
+The all_classifications.csv produced in this bundle is identical to the all_classifications.csv used for the reports, except that it has gained the subj.image and subj.id columns.
+
+This bundle generated from git state {u.git_condition()}
 ''')
 
   procs = []
