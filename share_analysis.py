@@ -6,7 +6,7 @@ from multiprocessing import Process
 import util as u
 
 os.makedirs('sharing', exist_ok = True)
-with tempfile.TemporaryDirectory(dir = '.') as tmpdir:
+with tempfile.TemporaryDirectory(dir = './secrets') as tmpdir:
   inner_dir = f'{tmpdir}/data_analysis'
   os.mkdir(inner_dir)
   copy('all_classifications.csv', inner_dir)
