@@ -303,6 +303,36 @@ However, the reproduction recipe is:
 
 Pseudonyms are randomly generated so will differ from run to run. They are unique per user-id.
 '''
+
+  if for_all:
+    blurb += f'''
+To generate the charts:
+* git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
+* cp all_classifications.csv engagingcrowds_engagement
+* cd engagingcrowds_engagement
+* pip install -r requirements.txt  #You might prefer to do this in a virtualenv
+* ./analyze.py
+
+Two sets of charts were generated in producing the report.
+
+The first set, produced by the commit tagged report_original, were used in the analysis described in the text of the report.
+
+The second set, produced by the commit tagged report_final, are the charts actually printed in the report. These versions of the charts have improved accessibility in some respects.
+
+To regenerate either set of charts using in producing the report, check out the appropriate tag before running ./analyse.py. For example:
+git checkout report_final
+The pip dependencies must be installed before the checkout is changed. This is because requirements.txt was commited at a later time.
+requirements.txt matches the dependencies used to generate both the final charts for the report and the contents of this bundle.
+The dependencies used for the analysis are lost but should at least be similar.
+
+The all_classifications.csv produced in this bundle is identical to the all_classifications.csv used for the reports, except that it has gained the subj.image and subj.id columns.
+'''
+
+  blurb += f'''
+
+This bundle generated from git state {u.git_condition()}
+'''
+
   return blurb
 
 def make_shareables(copied_df):
