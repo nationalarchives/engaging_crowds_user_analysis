@@ -305,7 +305,11 @@ However, the reproduction recipe is:
 
   if for_all:
     blurb += '''The output will appear as all_classifications.csv and README_all_classifications. To bundle it into a .zip or a
-.tar.xz file, run ./share_analysis.py and follow the instructions that it gives you.'''
+.tar.xz file, run ./share_analysis.py and follow the instructions that it gives you.
+
+Note that the generated output might not be exactly identical to the files used for analysis. This is because changes in the
+uploaded subjects can mean that URLs giving the location of the original subject can appear and disappear (and perhaps even
+be incorrect). However, these URLs are not used in analysis.'''
   else:
     blurb += 'The output will appear in the sharing/ directory.'
 
