@@ -294,12 +294,22 @@ Reproduction
 
 Reproduction of this data requires access to the original classifications, which is limited to the project team.
 However, the reproduction recipe is:
-* git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
-* cd engagingcrowds_engagement
+* git clone https://github.com/nationalarchives/engaging_crowds_user_analysis.git
+* cd engaging_crowds_user_analysis
 * git checkout {u.git_HEAD()} #Optional, to use the scripts at the point when this bundle was generated
 * pip install -r requirements.txt #You might prefer to do this in a virtualenv
-* (Download the original project export files from the relevant Engaging Crowds project(s) to engagingcrowds_engagement/exports/)
+* (Download the original project export files from the relevant Engaging Crowds project(s) to engaging_crowds_user_analysis/exports/)
 * ./pseudonymise.py
+
+'''
+
+  if for_all:
+    blurb += '''The output will appear as all_classifications.csv and README_all_classifications. To bundle it into a .zip or a
+.tar.xz file, run ./share_analysis.py and follow the instructions that it gives you.'''
+  else:
+    blurb += 'The output will appear in the sharing/ directory.'
+
+  blurb += '''
 
 Pseudonyms are randomly generated so will differ from run to run. They are unique per user-id.
 '''
@@ -307,9 +317,9 @@ Pseudonyms are randomly generated so will differ from run to run. They are uniqu
   if for_all:
     blurb += f'''
 To generate the charts:
-* git clone https://github.com/nationalarchives/engagingcrowds_engagement.git
-* cp all_classifications.csv engagingcrowds_engagement
-* cd engagingcrowds_engagement
+* git clone https://github.com/nationalarchives/engaging_crowds_user_analysis.git
+* cp all_classifications.csv engaging_crowds_user_analysis
+* cd engaging_crowds_user_analysis
 * pip install -r requirements.txt  #You might prefer to do this in a virtualenv
 * ./analyze.py
 
@@ -321,6 +331,7 @@ The second set, produced by the commit tagged report_final, are the charts actua
 
 To regenerate either set of charts using in producing the report, check out the appropriate tag before running ./analyse.py. For example:
 git checkout report_final
+
 The pip dependencies must be installed before the checkout is changed. This is because requirements.txt was commited at a later time.
 requirements.txt matches the dependencies used to generate both the final charts for the report and the contents of this bundle.
 The dependencies used for the analysis are lost but should at least be similar.
