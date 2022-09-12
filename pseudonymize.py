@@ -298,7 +298,7 @@ However, the reproduction recipe is:
 * cd engagingcrowds_engagement
 * git checkout {u.git_HEAD()} #Optional, to use the scripts at the point when this bundle was generated
 * pip install -r requirements.txt #You might prefer to do this in a virtualenv
-* (Download the original project export files from all Engaging Crowds projects to engagingcrowds_engagement/exports/)
+* (Download the original project export files from the relevant Engaging Crowds project(s) to engagingcrowds_engagement/exports/)
 * ./pseudonymise.py
 
 Pseudonyms are randomly generated so will differ from run to run. They are unique per user-id.
