@@ -322,7 +322,7 @@ Pseudonyms are randomly generated so will differ from run to run. They are uniqu
     blurb += f'''
 To generate the charts:
 * git clone https://github.com/nationalarchives/engaging_crowds_user_analysis.git
-* cp all_classifications.csv engaging_crowds_user_analysis
+* cp <all_classifications.csv from this bundle> engaging_crowds_user_analysis/
 * cd engaging_crowds_user_analysis
 * pip install -r requirements.txt  #You might prefer to do this in a virtualenv
 * ./analyze.py
