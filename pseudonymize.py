@@ -327,6 +327,8 @@ To generate the charts:
 * pip install -r requirements.txt  #You might prefer to do this in a virtualenv
 * ./analyze.py
 
+Graphs appear in engaging_crowds_user_analysis/secrets/graphs/.
+
 Two sets of charts were generated in producing the report.
 
 The first set, produced by the commit tagged report_original, were used in the analysis described in the text of the report.
