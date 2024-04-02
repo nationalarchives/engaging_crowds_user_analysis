@@ -11,8 +11,8 @@ import secrets
 import string
 import tempfile
 import shutil
-import data as d
-import util as u
+import data as config
+import util
 from collections import Counter
 
 #For debugging
@@ -134,8 +134,8 @@ WORKFLOW_STARTSTAMP = {
 STOPSTAMP = '2022-02-01T00:00:00.000000'
 
 SUBJECT_DESCRIPTIONS = {
-  d.HMS: ["subj.filename                Filename of the image"],
-  d.RBGE: ['subj.id                      Unique identifier for the specimen',
+  config.HMS: ["subj.filename                Filename of the image"],
+  config.RBGE: ['subj.id                      Unique identifier for the specimen',
            'subj.botanist                The botanist who collected the specimen',
            'subj.group                   The geographical region that the specimen was collected from',
            "subj.image                   Filename of the image",
@@ -143,7 +143,7 @@ SUBJECT_DESCRIPTIONS = {
            'subj.species                 The species of the specimen',
            'subj.barcode                 Barcode used to identify the specimen',
   ],
-  d.SB:['subj.date                    Date of the meeting',
+  config.SB:['subj.date                    Date of the meeting',
         'subj.page                    Page number in the minute book',
         '''subj.catalogue               Intended catalogue reference for the transcription. Only the top two levels
                              exist in the catalogue at time of writing. The third level will be added as
@@ -154,9 +154,9 @@ SUBJECT_DESCRIPTIONS = {
 }
 
 LOCATION_DESCRIPTIONS = {
-  d.HMS: '',
-  d.RBGE: 'location.rbge                Citable location of the classified file on the RBGE website',
-  d.SB:   'location.tna                 Location of the classified file in the TNA online catalogue',
+  config.HMS: '',
+  config.RBGE: 'location.rbge                Citable location of the classified file on the RBGE website',
+  config.SB:   'location.tna                 Location of the classified file in the TNA online catalogue',
 }
 
 def readme_blurb(projects):
@@ -245,7 +245,7 @@ Information on Reuse
 HMS NHS
 -------
 '''
-  if for_all or projects[0] == d.HMS:
+  if for_all or projects[0] == config.HMS:
     blurb += '''The records of the Dreadnought Seamen’s Hospital are Public Records (Crown copyright, see https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/), held by the National Maritime Museum as an official place of deposit under the terms of the Public Records Acts. The images of these records are used online by the National Maritime Museum with permission from Ancestry.
 
 The images are made available under the terms of the CC-BY-NC-ND 4.0 licence (https://creativecommons.org/licenses/by-nc-nd/4.0/). Users can view but not download the images. Users can re-use the images for non-commercial research, education or private study only.
@@ -256,7 +256,7 @@ The data are transcriptions of Public Records, which are also covered by Crown C
 Scarlets and Blues
 ------------------
 '''
-  if for_all or projects[0] == d.SB:
+  if for_all or projects[0] == config.SB:
     blurb += '''(c) Images used in Scarlets and Blues are reproduced by permission of The National Archives. The National Archives does not guarantee the accuracy, completeness or fitness for the purpose of the information provided. Images may be used only for purposes of research, private study or education. Applications for any other use should be made to The National Archives Image Library at images@nationalarchives.gov.uk.
 
 The National Archives is a government department, which means that all of the material we create is subject to Crown copyright (https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/). Data produced by volunteers is available for re-use under the terms of the Open Government Licence (OGL, https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/). This licence allows people to copy, publish and distribute information, as long as they acknowledge its source. It is compatible with the CC BY 4.0 Licence (https://creativecommons.org/licenses/by/4.0/)and the Open Data Commons Attribution Licence (https://opendatacommons.org/licenses/by/).
@@ -265,7 +265,7 @@ The National Archives is a government department, which means that all of the ma
 The RBGE Herbarium
 ------------------
 '''
-  if for_all or projects[0] == d.RBGE:
+  if for_all or projects[0] == config.RBGE:
     blurb += '''These images are licensed according to the CC BY 4.0 licence (https://creativecommons.org/licenses/by/4.0/). This licence allows people to freely use images as long as they give appropriate credit and indicate if any changes have been made.
 
 The data transcribed by volunteers is licensed according to the CC0 licence (https://creativecommons.org/share-your-work/public-domain/cc0). This licence means there are no copyright restrictions on this data and it can be freely reused.
@@ -277,13 +277,13 @@ Citation Information
 ====================
 
 '''
-  if for_all or projects[0] == d.HMS:
+  if for_all or projects[0] == config.HMS:
     blurb += "Any use of the images or data from HMS NHS should credit 'National Maritime Museum' as the source."
   if for_all: blurb += nl
-  if for_all or projects[0] == d.SB:
+  if for_all or projects[0] == config.SB:
     blurb += "Any use of the images or data from Scarlets and Blues should credit 'The National Archives' as the source."
   if for_all: blurb += nl
-  if for_all or projects[0] == d.RBGE:
+  if for_all or projects[0] == config.RBGE:
     blurb += "Any use of the images or data from The RBGE Herbarium should credit 'Royal Botanic Garden Edinburgh' as the source."
 
   blurb += f'''
@@ -296,7 +296,7 @@ Reproduction of this data requires access to the original classifications, which
 However, the reproduction recipe is:
 * git clone https://github.com/nationalarchives/engaging_crowds_user_analysis.git
 * cd engaging_crowds_user_analysis
-* git checkout {u.git_HEAD()} #Optional, to use the scripts at the point when this bundle was generated
+* git checkout {util.git_HEAD()} #Optional, to use the scripts at the point when this bundle was generated
 * pip install -r requirements.txt #You might prefer to do this in a virtualenv
 * (Download the original project export files from the relevant Engaging Crowds project(s) to engaging_crowds_user_analysis/exports/)
 * ./pseudonymise.py
@@ -347,7 +347,7 @@ The all_classifications.csv produced in this bundle is identical to the all_clas
 
   blurb += f'''
 
-This bundle generated from git state {u.git_condition()}
+This bundle generated from git state {util.git_condition()}
 '''
 
   return blurb
@@ -371,7 +371,7 @@ def make_shareables(copied_df):
     SB: _SB_ZOONIVERSE_LOCATION_FIXUP
   }
 
-  for project, wids in d.PROJECTS.items():
+  for project, wids in config.PROJECTS.items():
     print(f'  {project}')
     proj_df = copied_df[copied_df.workflow_id.isin(wids)].drop('START', axis = 'columns').dropna(axis='columns', how = 'all')
 
@@ -399,7 +399,7 @@ def make_shareables(copied_df):
     #that the 'location.zooniverse.project' field can legitimately
     #have different values for the same subject, depending upon which workflow
     #it was classified in and which subject set it belonged to.)
-    subj_df = pd.read_csv(f'{args.exports}/{d.SUBJECTS[project]}',
+    subj_df = pd.read_csv(f'{args.exports}/{config.SUBJECTS[project]}',
                           usecols = ['subject_id', 'workflow_id', 'subject_set_id', 'locations'])
     subj_sets = subj_df.set_index(['subject_id', 'workflow_id']).subject_set_id
     subj_locs = subj_df.set_index('subject_id').locations
@@ -421,7 +421,7 @@ def make_shareables(copied_df):
         #currently being the case, or by the file choosing to keep an entry for each subject_id that
         #a subject set has ever belonged to (if, indeed, it is allowed to do that)
         raise Exception('Expected single integer value for subject_set_id for subject in workflow')
-      return f"{d.PROJECT_URLS[project]}classify/workflow/{row['workflow_id']}/subject-set/{subj_set}/subject/{row['subject_ids']}"
+      return f"{config.PROJECT_URLS[project]}classify/workflow/{row['workflow_id']}/subject-set/{subj_set}/subject/{row['subject_ids']}"
     proj_df['location.zooniverse.project'] = proj_df.apply(get_subject_set_id, axis = 1)
 
     #This function is only needed to get the 'raw' location
@@ -451,13 +451,13 @@ def make_shareables(copied_df):
       ZOONIVERSE_LOCATION_FIXUPS[project](proj_df)
 
     with tempfile.TemporaryDirectory('.') as tmpdir:
-      basedir = f'{tmpdir}/{u.fnam_norm(project)}_data'
+      basedir = f'{tmpdir}/{util.fnam_norm(project)}_data'
       os.mkdir(basedir)
       with open(f'{basedir}/README.txt', 'w') as f:
         f.write(readme_blurb([project]))
       proj_df.to_csv(f'{basedir}/classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
       for ar_format in ('zip', 'xztar'):
-        shutil.make_archive(f'sharing/{u.fnam_norm(project)}', ar_format, tmpdir)
+        shutil.make_archive(f'sharing/{util.fnam_norm(project)}', ar_format, tmpdir)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('workflows',
@@ -699,7 +699,7 @@ def main():
   df = df.drop('annotations', axis = 'columns')
 
   with open('README_all_classifications', 'w') as f:
-    f.write(readme_blurb([d.SUBJECTS.keys()]))
+    f.write(readme_blurb([config.SUBJECTS.keys()]))
   df.to_csv('all_classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
 
   #paranoia checks
