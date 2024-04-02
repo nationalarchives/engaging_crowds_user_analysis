@@ -153,6 +153,10 @@ parser.add_argument('--config-checks',
                     action = argparse.BooleanOptionalAction,
                     default = True,
                     help = 'Run config checks on the config, to make sure that data structures share the same keys')
+parser.add_argument('--all-classifications',
+                    action = argparse.BooleanOptionalAction,
+                    default = False,
+                    help = 'Output a single file with classifications from all projects')
 args = parser.parse_args()
 config = importlib.import_module(args.config)
 if args.config_checks:
@@ -374,22 +378,23 @@ def main():
   #And we make a fake workflow of the attendance branch of the meetings workflow
   #Important to do this *before* we drop any rows! Otherwise the first page within a date group is not necessarily an attendance page.
   #FIXME: Read in the subjects file and use that to identify the attendance pages -- this won't break if we happen to start dropping rows earlier then here.
-  print('Generating all_classifications.csv for analysis')
-  attendance_subjects = df[df.workflow_id == 18504].sort_values('subj.page')[['subj.date', 'subject_ids']].groupby(['subj.date']).first().subject_ids
-  df.loc[df.subject_ids.isin(attendance_subjects), ('workflow_id', 'workflow_name')] = (1, 'attendance')
+  if args.all_classifications:
+    print('Generating all_classifications.csv for analysis')
+    attendance_subjects = df[df.workflow_id == 18504].sort_values('subj.page')[['subj.date', 'subject_ids']].groupby(['subj.date']).first().subject_ids
+    df.loc[df.subject_ids.isin(attendance_subjects), ('workflow_id', 'workflow_name')] = (1, 'attendance')
 
-  df['md.started_at'] = df['md.started_at'].astype(np.datetime64)
-  df = df[df['md.started_at'] >= df['START']]
-  df = df.drop('START', axis = 'columns')
+    df['md.started_at'] = df['md.started_at'].astype(np.datetime64)
+    df = df[df['md.started_at'] >= df['START']]
+    df = df.drop('START', axis = 'columns')
 
-  df['md.finished_at'] = df['md.finished_at'].astype(np.datetime64)
-  df = df[df['md.finished_at'] < np.datetime64(config.STOPSTAMP)]
+    df['md.finished_at'] = df['md.finished_at'].astype(np.datetime64)
+    df = df[df['md.finished_at'] < np.datetime64(config.STOPSTAMP)]
 
-  df = df.drop('annotations', axis = 'columns')
+    df = df.drop('annotations', axis = 'columns')
 
-  with open('README_all_classifications', 'w') as f:
-    f.write(config.readme_blurb([config.SUBJECTS.keys()]))
-  df.to_csv('all_classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
+    with open('README_all_classifications', 'w') as f:
+      f.write(config.readme_blurb([config.SUBJECTS.keys()]))
+    df.to_csv('all_classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
 
   #paranoia checks
   if len(identities) != len(set(identities.keys())):   raise Exception('User names in args.dictionary are not unique')
