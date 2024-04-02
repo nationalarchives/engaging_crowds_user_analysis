@@ -1,5 +1,3 @@
-import pandas as pd
-
 HEAD = None
 
 #Opted to go with 'str' over 'category' -- while category seems to make sense in many cases, it sometimes behaves
@@ -88,11 +86,6 @@ LABELS = {
   18625: '13. Days Victualled',
   19381: 'Geography',
   19385: 'Latitude/Longitude',
-}
-
-class_cap = {
-    SB: pd.Timedelta(150, 'm'),
-    HMS: pd.Timedelta(30, 'm'),
 }
 
 workflow_map = {
