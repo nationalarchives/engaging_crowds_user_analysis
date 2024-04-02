@@ -88,23 +88,23 @@ WORKFLOW_SUBJECT_KEEPERS = {
 
 #Workflow version to keep (will remove rows where the workflow with name 'key' has version not in 'value')
 WORKFLOW_KEEPERS = {
-  18504: [132.205],
-  18505: [56.83],
-  18611: [3.1],
-  18612: [3.1, 4.1],
-  18613: [3.1],
-  18614: [3.1],
-  18616: [3.1],
-  18617: [3.1],
-  18618: [3.1],
-  18619: [3.1],
-  18621: [3.1],
-  18622: [3.1],
-  18623: [3.1],
-  18624: [3.1, 6.4],
-  18625: [3.1],
-  19381: [122.201],
-  19385: [46.223],
+  18504: ['132.205'],
+  18505: ['56.83'],
+  18611: ['3.1'],
+  18612: ['3.1', '4.1'],
+  18613: ['3.1'],
+  18614: ['3.1'],
+  18616: ['3.1'],
+  18617: ['3.1'],
+  18618: ['3.1'],
+  18619: ['3.1'],
+  18621: ['3.1'],
+  18622: ['3.1'],
+  18623: ['3.1'],
+  18624: ['3.1', '6.4'],
+  18625: ['3.1'],
+  19381: ['122.201'],
+  19385: ['46.223'],
 }
 
 #Based on displayed timestamp in the emails as I received them
@@ -605,7 +605,7 @@ def expand_json(df, json_column, json_fields, prefix, json_parser = json.loads):
 def read_workflow(workflow):
   print(workflow, WORKFLOW_NAMES[workflow])
   csv_file = f'{args.exports}/{WORKFLOW_NAMES[workflow]}-classifications.csv'
-  df = pd.read_csv(csv_file)
+  df = pd.read_csv(csv_file, converters = { 'workflow_version': lambda x: str(x) })
   if not len(df.workflow_id.unique()) == 1:
     raise Exception(f'Too many workflow ids in {csv_file}')
   if df.workflow_id.iloc[0] != workflow:
