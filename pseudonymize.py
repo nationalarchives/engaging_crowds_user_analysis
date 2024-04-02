@@ -699,7 +699,7 @@ def main():
   df = df.drop('annotations', axis = 'columns')
 
   with open('README_all_classifications', 'w') as f:
-    f.write(readme_blurb([d.SB, d.HMS, d.RBGE]))
+    f.write(readme_blurb([d.SUBJECTS.keys()]))
   df.to_csv('all_classifications.csv', index = False, date_format='%Y-%m-%dT%H:%M:%S.%fZ%z')
 
   #paranoia checks
