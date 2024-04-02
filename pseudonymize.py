@@ -23,6 +23,26 @@ from collections import Counter
 #Dictionary storing individual CSV files minimally altered
 minimal_pseudonyms = {}
 
+def config_checks():
+  def compare(comparator):
+    baseline = set(config.WORKFLOW_NAMES.keys())
+    comparator = set(comparator)
+    assert baseline == comparator, f'Mismatch in config checks:\n{sorted(baseline)}\nvs\n{sorted(comparator)}'
+  compare(config.WORKFLOW_KEEPERS.keys())
+  compare(config.WORKFLOW_SUBJECT_KEEPERS.keys())
+  compare(config.WORKFLOW_STARTSTAMP.keys())
+  compare(config.WORKFLOW_STARTSTAMP.keys())
+  all_proj_workflows = []
+  for proj_workflows in config.PROJECTS.values():
+    all_proj_workflows.extend(proj_workflows)
+  compare(all_proj_workflows)
+  assert len(set(all_proj_workflows)) == len(all_proj_workflows)
+  compare(config.LABELS.keys())
+  compare(config.workflow_map.keys())
+  if not os.path.isfile(args.dictionary):
+    with open(args.dictionary, 'w') as f: pass #confirm that we can write a file here
+    os.unlink(args.dictionary)
+
 def make_shareables(copied_df):
   for project, wids in config.PROJECTS.items():
     print(f'  {project}')
@@ -124,7 +144,13 @@ parser.add_argument('--exports', '-e',
 parser.add_argument('--dictionary', '-d',
                     default = 'secrets/identities.json',
                     help = 'Dictionary file to record the pseudonymisation result')
+parser.add_argument('--config-checks',
+                    action = argparse.BooleanOptionalAction,
+                    default = True,
+                    help = 'Run config checks on the config, to make sure that data structures share the same keys')
 args = parser.parse_args()
+if args.config_checks:
+  config_checks()
 
 #Validate CLI
 for workflow in args.workflows:
