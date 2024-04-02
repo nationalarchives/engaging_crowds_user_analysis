@@ -1,3 +1,6 @@
+import util
+from os import linesep as nl
+
 HEAD = None
 
 WORKFLOW_NAMES = {
@@ -246,8 +249,6 @@ ZOONIVERSE_LOCATION_FIXUPS = {
 }
 
 def readme_blurb(projects):
-  import util
-  from os import linesep as nl
   for_all = len(projects) == len(LOCATION_DESCRIPTIONS)
   assert len(projects) == 1 or for_all
   blurb = f'''About This Data
