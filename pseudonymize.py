@@ -381,7 +381,7 @@ def make_shareables(copied_df):
     #that the 'location.zooniverse.project' field can legitimately
     #have different values for the same subject, depending upon which workflow
     #it was classified in and which subject set it belonged to.)
-    subj_df = pd.read_csv(f'exports/{d.SUBJECTS[project]}',
+    subj_df = pd.read_csv(f'{args.exports}/{d.SUBJECTS[project]}',
                           usecols = ['subject_id', 'workflow_id', 'subject_set_id', 'locations'])
     subj_sets = subj_df.set_index(['subject_id', 'workflow_id']).subject_set_id
     subj_locs = subj_df.set_index('subject_id').locations
