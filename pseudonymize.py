@@ -99,6 +99,9 @@ def make_shareables(copied_df):
 
     #This function is only needed to get the 'raw' location
     def parse_subj_loc(sid):
+      if not sid in subj_locs:
+        print(f'No subjects file entry for subject_id {sid}', file = sys.stderr)
+        return '<UNLISTED SUBJECT>'
       loc = subj_locs.loc[sid]
       if isinstance(loc, pd.Series):
         loc = loc.unique() #Returns ndarray or ExtensionArray. I'm assuming len and [] work the same either way.
@@ -116,7 +119,7 @@ def make_shareables(copied_df):
       if not '0' in loc:
         raise Exception('Location missing key "0" for subject_id {sid} -- should be its only key')
       if len(loc['0'].strip()) == 0:
-        print(f'No subjects file entry for subject_id {sid}', file = sys.stderr)
+        print(f'Empty subjects file entry for subject_id {sid}', file = sys.stderr)
         return '<UNLISTED SUBJECT>'
       else: return loc['0']
     proj_df['location.zooniverse.plain'] = proj_df.subject_ids.apply(parse_subj_loc)
