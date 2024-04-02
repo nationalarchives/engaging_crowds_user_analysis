@@ -353,6 +353,24 @@ This bundle generated from git state {u.git_condition()}
   return blurb
 
 def make_shareables(copied_df):
+  def _RBGE_LOCATION_FIXUP(df):
+    df['location.rbge'] = 'https://data.rbge.org.ul/herb/' + df['subj.barcode']
+
+  def _SB_LOCATION_FIXUP(df):
+    df['location.tna'] = 'https://discovery.nationalarchives.gov.uk/details/r/C' + df['subj.image'].apply(lambda x: str(int(x.split('_')[2]) - 433 + 170195))
+
+  LOCATION_FIXUPS = {
+    RBGE: _RBGE_LOCATION_FIXUP,
+    SB:   _SB_LOCATION_FIXUP,
+  }
+
+  def _SB_ZOONIVERSE_LOCATION_FIXUP(df):
+    df['location.zooniverse.plain'] = 'https://tanc-ahrc.github.io/EngagingCrowds/galleries/terms_wrapper.html?img=' + df['location.zooniverse.plain']
+
+  ZOONIVERSE_LOCATION_FIXUPS = {
+    SB: _SB_ZOONIVERSE_LOCATION_FIXUP
+  }
+
   for project, wids in d.PROJECTS.items():
     print(f'  {project}')
     proj_df = copied_df[copied_df.workflow_id.isin(wids)].drop('START', axis = 'columns').dropna(axis='columns', how = 'all')
@@ -385,9 +403,8 @@ def make_shareables(copied_df):
                           usecols = ['subject_id', 'workflow_id', 'subject_set_id', 'locations'])
     subj_sets = subj_df.set_index(['subject_id', 'workflow_id']).subject_set_id
     subj_locs = subj_df.set_index('subject_id').locations
-    if project == d.RBGE: proj_df['location.rbge'] = 'https://data.rbge.org.uk/herb/' + proj_df['subj.barcode']
-    elif project == d.SB: proj_df['location.tna'] = 'https://discovery.nationalarchives.gov.uk/details/r/C' + \
-                          proj_df['subj.image'].apply(lambda x: str(int(x.split('_')[2]) - 433 + 170195))
+    if project in LOCATION_FIXUPS:
+      LOCATION_FIXUPS[project](proj_df)
 
     #This function is only needed to get the 'project' location
     def get_subject_set_id(row):
@@ -430,8 +447,8 @@ def make_shareables(copied_df):
         return '<UNLISTED SUBJECT>'
       else: return loc['0']
     proj_df['location.zooniverse.plain'] = proj_df.subject_ids.apply(parse_subj_loc)
-    if project == d.SB:
-      proj_df['location.zooniverse.plain'] = 'https://tanc-ahrc.github.io/EngagingCrowds/galleries/terms_wrapper.html?img=' + proj_df['location.zooniverse.plain']
+    if project in ZOONIVERSE_LOCATION_FIXUPS:
+      ZOONIVERSE_LOCATION_FIXUPS[project](proj_df)
 
     with tempfile.TemporaryDirectory('.') as tmpdir:
       basedir = f'{tmpdir}/{u.fnam_norm(project)}_data'
