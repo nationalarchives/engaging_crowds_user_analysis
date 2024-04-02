@@ -157,6 +157,8 @@ parser.add_argument('--all-classifications',
                     action = argparse.BooleanOptionalAction,
                     default = False,
                     help = 'Output a single file with classifications from all projects')
+parser.add_argument('--exclusions',
+                    help = 'Output of an earlier run of this program, containing classifications to be excluded from this run')
 args = parser.parse_args()
 config = importlib.import_module(args.config)
 if args.config_checks:
@@ -351,6 +353,12 @@ def main():
   #Read in all of the CSVs with a generator expression, as suggested here:
   #https://stackoverflow.com/a/21232849
   df = pd.concat([read_workflow(x) for x in args.workflows], ignore_index = True)
+
+  #dump any classifications we want to exclude (e.g. because they were part of an earlier phase)
+  if args.exclusions:
+    exclude_classifications = pd.read_csv(args.exclusions).classification_id
+    df = df[~df['classification_id'].isin(exclude_classifications)]
+    df = df.reset_index(drop = True)
 
   print('Pseudonymising')
   #Pseudonymise the individual files, building pseudonyms for everyone who has ever classified as a side effect
