@@ -11,7 +11,7 @@ import secrets
 import string
 import tempfile
 import shutil
-import data as config
+import importlib
 import util
 from collections import Counter
 
@@ -136,7 +136,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('workflows',
                     nargs = '*',
                     type = int,
-                    default = config.WORKFLOW_NAMES.keys(),
                     help = 'Workflows to pseudonymise')
 parser.add_argument('--exports', '-e',
                    default = 'exports',
@@ -144,13 +143,21 @@ parser.add_argument('--exports', '-e',
 parser.add_argument('--dictionary', '-d',
                     default = 'secrets/identities.json',
                     help = 'Dictionary file to record the pseudonymisation result')
+parser.add_argument('--config',
+                    default = 'data',
+                    help = 'Python file to set the built-in configuration')
 parser.add_argument('--config-checks',
                     action = argparse.BooleanOptionalAction,
                     default = True,
                     help = 'Run config checks on the config, to make sure that data structures share the same keys')
 args = parser.parse_args()
+config = importlib.import_module(args.config)
 if args.config_checks:
   config_checks()
+if len(args.workflows) == 0:
+  args.workflows = list(config.WORKFLOW_NAMES.keys())
+else:
+  assert set(args.workflows) <= set(config.WORKFLOW_NAMES.keys()) #if workflows are given on CLI, all given workflows must be given in the config
 
 #Validate CLI
 for workflow in args.workflows:
