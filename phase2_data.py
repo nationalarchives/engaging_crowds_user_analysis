@@ -1,3 +1,4 @@
+import sys
 import util
 from os import linesep as nl
 
@@ -161,35 +162,26 @@ LOCATION_FIXUPS = {}
 ZOONIVERSE_LOCATION_FIXUPS = {}
 
 def readme_blurb(projects):
-  for_all = len(projects) == len(LOCATION_DESCRIPTIONS)
-  for_all = for_all != 1 #if there is only one project then for_all makes no sense and should not apply
-  assert len(projects) == 1 or for_all
   blurb = f'''About This Data
 ===============
 
-This data describes the individual classifications made by volunteers in this Zooniverse
-project. It is provided as a Comma Separated Values (CSV) file. The easiest way to view the
-data is to open it in standard spreadsheet software such as Excel, Numbers or Google sheets.
-This will show the data as a table, with column headings at the top. These column headings
-label the 'fields' making up the data. A field is a single entity in the data, such as a user
-name or the time at which a classification was completed. Each row in the table gives
-information about a single classification of a single record by a single volunteer.
+This data describes the individual classifications made by volunteers in phase 2 of HMS NHS,
+provided as a Comma Separated Values (CSV) file. The easiest way to view the data is to open
+it in standard spreadsheet software such as Excel, Numbers or Google sheets. This will show the
+data as a table, with column headings at the top. These column headings label the 'fields' making
+up the data. A field is a single entity in the data, such as a user name or the time at which a
+classification was completed. Each row in the table gives information about a single classification
+of a single record by a single volunteer.
+
+The data does not overlap with that from phase 1, except for two rows(classification_id
+392796932 and 392798956) which classify admission numbers from phase 2 but were somehow
+included in phase 1. These two entries are included in both phase 1 and phase 2.
 
 The complete list of fields that we provide is:
 
 classification_id            Unique identifier for the classification
-workflow_id                  Unique identifier for the workflow within which the classification was made'''
-  if for_all:
-    blurb += """
-                             ID 1 is a made-up ID number for the 'Attendance' branch for the 'Meetings' workflow in
-                             'Scarlets and Blues' (see 'workflow_name', below)"""
-  blurb += '''
-workflow_name                The human-readable name of the workflow within which the classification was made'''
-  if for_all:
-    blurb += """
-                             'Attendance' is the branch of the 'Meetings' workflow for dealing with the initial 'attendance and standard minutes'
-                             page of a set of meeting minutes. It is treated as a separate workflow for analysis purposes."""
-  blurb += f'''
+workflow_id                  Unique identifier for the workflow within which the classification was made
+workflow_name                The human-readable name of the workflow within which the classification was made
 workflow_version             The version of the workflow within which the classification was made
 created_at                   The server-side date/time that the classification was made
 annotations                  The volunteer's transcription of the record. This is a JSON structure recording the volunteer's path
@@ -200,10 +192,12 @@ subject_ids                  Unique identifier of the subject to which the class
 subj.#priority               Number used by the indexer to order the subjects.
 subj.retired.retired_at      UTC date/time that the subject acquired enough classifications to be considered complete.
 {nl.join(dict.fromkeys([line for p in projects for line in SUBJECT_DESCRIPTIONS[p]]).keys())}
-pseudonym                    Pseudonym for the user who made the classification. Pseudonyms are consistent across all three projects.
+pseudonym                    Pseudonym for the user who made the classification. 'user:' pseudonyms are consistent across all Engaging Crowds projects.
                              A pseudonym beginning 'user': indicates a logged-in user. A pseudonym beginning 'anon:' indicates an
                              anonymous user, identified by a hash of their IP address. This should be treated as a much less reliable
-                             identification than a user login.
+                             identification than a user login. Additionally, IP address hashing may have changed since the phase 1
+                             HMS NHS data was prepared, meaning that 'anon:' pseudonyms cannot meaningfully be compared across
+                             phases 1 and 2, or with other Engaging Crowds proejcts.
 md.started_at                Client-side UTC start date/time of classification
 md.finished_at               Client-side UTC finish date/time of classification
 md.utc_offset                Offset from client's local time to UTC (subtract utc_offset to convert to local time)
@@ -241,53 +235,18 @@ by pseudonyms.
 
 Information on Reuse
 ====================
-'''
-  if for_all: blurb += '''
-HMS NHS
--------
-'''
-  if for_all or projects[0] == HMS:
-    blurb += '''The records of the Dreadnought Seamen’s Hospital are Public Records (Crown copyright, see https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/), held by the National Maritime Museum as an official place of deposit under the terms of the Public Records Acts. The images of these records are used online by the National Maritime Museum with permission from Ancestry.
+
+The records of the Dreadnought Seamen’s Hospital are Public Records (Crown copyright, see https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/), held by the National Maritime Museum as an official place of deposit under the terms of the Public Records Acts. The images of these records are used online by the National Maritime Museum with permission from Ancestry.
 
 The images are made available under the terms of the CC-BY-NC-ND 4.0 licence (https://creativecommons.org/licenses/by-nc-nd/4.0/). Users can view but not download the images. Users can re-use the images for non-commercial research, education or private study only.
 
 The data are transcriptions of Public Records, which are also covered by Crown Copyright. The data is made available under the terms of the Open Government Licence (OGL, see https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/), which is compatible with CC BY 4.0 licence (https://creativecommons.org/licenses/by/4.0/). Users can copy, publish, distribute, transmit and adapt the data for both commercial and non-commercial use.
-'''
-  if for_all: blurb += '''
-Scarlets and Blues
-------------------
-'''
-  if for_all or projects[0] == SB:
-    blurb += '''(c) Images used in Scarlets and Blues are reproduced by permission of The National Archives. The National Archives does not guarantee the accuracy, completeness or fitness for the purpose of the information provided. Images may be used only for purposes of research, private study or education. Applications for any other use should be made to The National Archives Image Library at images@nationalarchives.gov.uk.
 
-The National Archives is a government department, which means that all of the material we create is subject to Crown copyright (https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/). Data produced by volunteers is available for re-use under the terms of the Open Government Licence (OGL, https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/). This licence allows people to copy, publish and distribute information, as long as they acknowledge its source. It is compatible with the CC BY 4.0 Licence (https://creativecommons.org/licenses/by/4.0/)and the Open Data Commons Attribution Licence (https://opendatacommons.org/licenses/by/).
-'''
-  if for_all: blurb += '''
-The RBGE Herbarium
-------------------
-'''
-  if for_all or projects[0] == RBGE:
-    blurb += '''These images are licensed according to the CC BY 4.0 licence (https://creativecommons.org/licenses/by/4.0/). This licence allows people to freely use images as long as they give appropriate credit and indicate if any changes have been made.
-
-The data transcribed by volunteers is licensed according to the CC0 licence (https://creativecommons.org/share-your-work/public-domain/cc0). This licence means there are no copyright restrictions on this data and it can be freely reused.
-'''
-
-  blurb += '''
 
 Citation Information
 ====================
 
-'''
-  if for_all or projects[0] == HMS:
-    blurb += "Any use of the images or data from HMS NHS should credit 'National Maritime Museum' as the source."
-  if for_all: blurb += nl
-  if for_all or projects[0] == SB:
-    blurb += "Any use of the images or data from Scarlets and Blues should credit 'The National Archives' as the source."
-  if for_all: blurb += nl
-  if for_all or projects[0] == RBGE:
-    blurb += "Any use of the images or data from The RBGE Herbarium should credit 'Royal Botanic Garden Edinburgh' as the source."
-
-  blurb += f'''
+Any use of the images or data from HMS NHS should credit 'National Maritime Museum' as the source.
 
 
 Reproduction
@@ -302,53 +261,22 @@ However, the reproduction recipe is:
 * (Download the original project export files from the relevant Engaging Crowds project(s) to engaging_crowds_user_analysis/exports/)
 * ./pseudonymise.py
 
-'''
-
-  if for_all:
-    blurb += '''The output will appear as all_classifications.csv and README_all_classifications. To bundle it into a .zip or a
-.tar.xz file, run ./share_analysis.py and follow the instructions that it gives you.'''
-  else:
-    blurb += '''The output will appear in the sharing/ directory.
+The output will appear in the sharing/ directory.
 
 Note that the generated output might not be exactly identical to the files on the website. This is because changes in the
 uploaded subjects can mean that URLs giving the location of the original subject can appear and disappear (and perhaps even
-be incorrect).'''
+be incorrect). Other changes are also possible, for example IP address hashing may have changed between the first and
+second phases of this project.
 
-  blurb += '''
-
-Pseudonyms are randomly generated so will differ from run to run. They are unique per user-id.
-'''
-
-  if for_all:
-    blurb += f'''
-To generate the charts:
-* git clone https://github.com/nationalarchives/engaging_crowds_user_analysis.git
-* cp <all_classifications.csv from this bundle> engaging_crowds_user_analysis/
-* cd engaging_crowds_user_analysis
-* pip install -r requirements.txt  #You might prefer to do this in a virtualenv
-* ./analyze.py
-
-Graphs appear in engaging_crowds_user_analysis/secrets/graphs/.
-
-Two sets of charts were generated in producing the report.
-
-The first set, produced by the commit tagged report_original, were used in the analysis described in the text of the report.
-
-The second set, produced by the commit tagged report_final, are the charts actually printed in the report. These versions of the charts have improved accessibility in some respects.
-
-To regenerate either set of charts using in producing the report, check out the appropriate tag before running ./analyse.py. For example:
-git checkout report_final
-
-The pip dependencies must be installed before the checkout is changed. This is because requirements.txt was commited at a later time.
-requirements.txt matches the dependencies used to generate both the final charts for the report and the contents of this bundle.
-The dependencies used for the analysis are lost but should at least be similar.
-
-The all_classifications.csv produced in this bundle is identical to the all_classifications.csv used for the reports, except that it has gained the subj.image and subj.id columns.
-'''
-
-  blurb += f'''
+Pseudonyms are randomly generated so will differ from run to run. They are unique per user-id and 'user:' pseudonyms are
+consistent (identify the same user) across Engaging Crowds projects, including in both phases of HMS NHS. Pseudonyms in
+phase 2 that are based on IP address (beginning 'anon:') cannot meaningfully be compared with the phase 1 HMS NHS data or with
+other Engaging Crowds projects.
 
 This bundle generated from git state {util.git_condition()}
+
+This bundle generated with the command:
+{' '.join(sys.argv)}
 '''
 
   return blurb
