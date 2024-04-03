@@ -159,6 +159,10 @@ parser.add_argument('--all-classifications',
                     help = 'Output a single file with classifications from all projects')
 parser.add_argument('--exclusions',
                     help = 'Output of an earlier run of this program, containing classifications to be excluded from this run')
+parser.add_argument('--exclusions-override',
+                    action = 'append',
+                    type = int,
+                    help = 'List of classification ids to include even if they would otherwise be excluded')
 args = parser.parse_args()
 config = importlib.import_module(args.config)
 if args.config_checks:
@@ -357,6 +361,7 @@ def main():
   #dump any classifications we want to exclude (e.g. because they were part of an earlier phase)
   if args.exclusions:
     exclude_classifications = pd.read_csv(args.exclusions).classification_id
+    exclude_classifications = exclude_classifications[~exclude_classifications.isin(args.exclusions_override)]
     df = df[~df['classification_id'].isin(exclude_classifications)]
     df = df.reset_index(drop = True)
 
