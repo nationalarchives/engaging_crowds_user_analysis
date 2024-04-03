@@ -171,6 +171,7 @@ if len(args.workflows) == 0:
   args.workflows = list(config.WORKFLOW_NAMES.keys())
 else:
   assert set(args.workflows) <= set(config.WORKFLOW_NAMES.keys()) #if workflows are given on CLI, all given workflows must be given in the config
+assert len(set(args.exclusions_override)) == len(args.exclusions_override) #overrides should be unique
 
 #Validate CLI
 for workflow in args.workflows:
@@ -361,6 +362,7 @@ def main():
   #dump any classifications we want to exclude (e.g. because they were part of an earlier phase)
   if args.exclusions:
     exclude_classifications = pd.read_csv(args.exclusions).classification_id
+    assert set(exclude_classifications[exclude_classifications.isin(args.exclusions_override)]) == set(args.exclusions_override) #verify that overrides are actually in the exclusions
     exclude_classifications = exclude_classifications[~exclude_classifications.isin(args.exclusions_override)]
     df = df[~df['classification_id'].isin(exclude_classifications)]
     df = df.reset_index(drop = True)
