@@ -365,7 +365,7 @@ def main():
     assert set(exclude_classifications[exclude_classifications.isin(args.exclusions_override)]) == set(args.exclusions_override) #verify that overrides are actually in the exclusions
     exclude_classifications = exclude_classifications[~exclude_classifications.isin(args.exclusions_override)]
     df = df[~df['classification_id'].isin(exclude_classifications)]
-    df = df.reset_index(drop = True)
+    df = df.reset_index(drop = True) #Reset the index so that we line up with the JSON expansion
 
   print('Pseudonymising')
   #Pseudonymise the individual files, building pseudonyms for everyone who has ever classified as a side effect
