@@ -61,6 +61,7 @@ cd engaging_crowds_user_analysis
 ./pseudonymize.py
 ```
 > :warning: There are assumptions relating to Engaging Crowds in the scripts. You will likely need to change them to work with your project. This should really be engineered so that the script can be easily configured for different projects: patches welcome.
+> :warning: If you are regenerating Zooniverse data note then it is of course possible that old data may change. For example, a change in the hashing algorithm for IP addresses may change the hashed IP addresses themselves.
 
 This creates:
 * `all_classifications.csv`: Pseudonymised classifications from all workflows, suitable to input to `analyze.py`
