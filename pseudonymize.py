@@ -370,6 +370,11 @@ def main():
   print('Pseudonymising')
   #Pseudonymise the individual files, building pseudonyms for everyone who has ever classified as a side effect
   for v in minimal_pseudonyms.values():
+    #The assignment to v here has the potential for a SettingWithCopy bug
+    #(re last bit of https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#why-does-assignment-fail-when-using-chained-indexing)
+    #The failure mode would be that the fields do not get updated with their anonymized forms
+    #By inspection on latest run, this appears not to be triggering the bug. Hopefully the behaviour is consistent, given that the types of these columns will be consistent.
+    #(These are also not files that we put on the data sharing platform, and it seems unlikely that I would not have noticed this failing during user analysis)
     v[['user_name', 'user_id', 'user_ip']] = v[['user_name', 'user_id', 'user_ip']].apply(pseudonymize, axis = 'columns', result_type = 'expand')
 
   #Pseudonymize using the previously-generated pseuondyms, and then drop the useless field
